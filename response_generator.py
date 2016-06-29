@@ -3,6 +3,7 @@ import hashlib
 import logging
 from flask import Response as FlaskResponse
 
+
 class ResponseGenerator:
     """
     possible expectation fields:
@@ -11,20 +12,22 @@ class ResponseGenerator:
      - - path
      - - body
      - - headers # later
-     - - - header
      - - - - key
      - - - - value
      - - cookies # later
      - - - - key
      - - - - value
+
      - forward
      - - protocol
      - - host
      - - port
+
      - response
      - - httpcode
      - - headers
      - - body
+
      - misc
      - - delay
      - - remaining_times
@@ -33,6 +36,7 @@ class ResponseGenerator:
     """
     expectations = {}  # dict with <md5: json_object>
     re_flags = re.DOTALL
+
     @classmethod
     def generate(cls, request):
         if len(ResponseGenerator.expectations) > 0:
@@ -42,12 +46,27 @@ class ResponseGenerator:
 
                 if ResponseGenerator.is_expectation_match_request(expectation['request'], request):
                     return ResponseGenerator.do_action(expectation)
-        return "404 - no expectation for request: \r\n " + str(request)
+        return FlaskResponse("No expectation for request: \r\n " + str(request), 200)
+
+    @classmethod
+    def remove_all_expectations(cls, key):
+        for key in cls.expectations:
+            del(cls.expectations[key])
+        return FlaskResponse("All expectations were removed", 200)
+
+    @classmethod
+    def remove_expectation(cls, key):
+        if key in cls.expectations:
+            del(cls.expectations[key])
+        return FlaskResponse("Expectation with key %s was removed" % key, 200)
 
     @classmethod
     def add_expectation(cls, expectation_as_dict):
         key = hashlib.md5(str(expectation_as_dict).encode()).hexdigest()
-        cls.expectations[key] = expectation_as_dict
+        if key not in cls.expectations:
+            cls.expectations[key] = expectation_as_dict
+            return FlaskResponse("Expectation was added with key %s" % key, 200)
+        return FlaskResponse("Expectation was not added!", 200)
 
     @classmethod
     def validate_expectation(cls, expectation_as_dict):
