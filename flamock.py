@@ -1,6 +1,7 @@
+import sys
+import logging
 from flask import Flask
 from flask import request
-from incoming_request import IncomingRequest
 from response_generator import ResponseGenerator
 
 app = Flask(__name__)
@@ -17,7 +18,7 @@ def flamock_admin(request_path):
 @app.route('/', defaults={'request_path': ''})
 @app.route('/<path:request_path>')
 def hello_world(request_path):
-    req = IncomingRequest(request_path, request.headers, request.data, request.cookies)
+    req = {'path': request_path, 'headers': request.headers, 'body': request.data, 'cookies': request.cookies}
     return ResponseGenerator(req).generate()
 
 

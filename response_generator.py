@@ -1,40 +1,92 @@
 import re
 import hashlib
+import logging
 from flask import Response as FlaskResponse
-class ResponseGenerator:
-    expectations = {} # dict with <md5: json_object>
 
+class ResponseGenerator:
+    """
+    possible expectation fields:
+     - request
+     - - method
+     - - path
+     - - body
+     - - headers # later
+     - - - header
+     - - - - key
+     - - - - value
+     - - cookies # later
+     - - - - key
+     - - - - value
+     - forward
+     - - protocol
+     - - host
+     - - port
+     - response
+     - - httpcode
+     - - headers
+     - - body
+     - misc
+     - - delay
+     - - remaining_times
+     - - unlimited
+
+    """
+    expectations = {}  # dict with <md5: json_object>
+    re_flags = re.DOTALL
     @classmethod
     def generate(cls, request):
         if len(ResponseGenerator.expectations) > 0:
             for key, expectation in ResponseGenerator.expectations.items():
-                if 'request' in expectation:
-                    if ResponseGenerator.is_expectation_mathces_request(expectation['request'], request):
-                        return ResponseGenerator.do_action(expectation['action'])
-        return "Hello World! \r\n " + str(request)
+                if 'request' not in expectation:
+                    continue
 
+                if ResponseGenerator.is_expectation_match_request(expectation['request'], request):
+                    return ResponseGenerator.do_action(expectation)
+        return "404 - no expectation for request: \r\n " + str(request)
 
     @classmethod
     def add_expectation(cls, expectation_as_dict):
         key = hashlib.md5(str(expectation_as_dict).encode()).hexdigest()
         cls.expectations[key] = expectation_as_dict
 
-
     @classmethod
     def validate_expectation(cls, expectation_as_dict):
         #todo
         pass
 
+    @classmethod
+    def is_expectation_match_request(cls, request_exp, request_act):
+        if 'method' in request_exp:
+            try:
+                if request_exp['method'] != request_act['method']:
+                    logging.warning('Difference in {attribute}. expected: {expected_value}, actual: {actual_value}'.format(
+                        attribute='method', expected_value=request_exp['method'], actual_value=request_act['method']))
+                    return False
+            except AttributeError as e:
+                logging.exception(e)
+                return False
 
-    @staticmethod
-    def is_expectation_mathces_request(request_exp, request_act):
         if 'path' in request_exp:
-            if request_exp['path'] == request_act.path:
-                return True
-        return False
+            try:
+                compiled_pattern = re.compile(request_exp['path'], cls.re_flags)
+                search_result = compiled_pattern.search(request_act['path'])
+                if search_result is None:
+                    logging.warning('Difference in {attribute}. expected: {expected_value}, actual: {actual_value}'.format(
+                        attribute='path', expected_value=request_exp['path'], actual_value=request_act['path']))
+                    return False
+            except TypeError as e:
+                logging.exception(e)
+                if request_exp['path'] not in request_act['path']:
+                    logging.warning('Difference in {attribute}. expected: {expected_value}, actual: {actual_value}'.format(
+                        attribute='path', expected_value=request_exp['path'], actual_value=request_act['path']))
+                    return False
+        return True
 
     @staticmethod
-    def do_action(action):
-        response = FlaskResponse("Mock answer!", 200)
+    def do_action(expectation):
+        response = None
+        if 'response' in expectation:
+            expected_response = expectation['response']
+            response = FlaskResponse(expected_response['body'], expected_response['httpcode'])
         return response
 
