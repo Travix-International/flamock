@@ -1,7 +1,11 @@
 import json
+import logging
 import unittest
+from flamock import logging_format
 
 from expectation_manager import ExpectationManager
+
+logging.basicConfig(level=logging.DEBUG, format=logging_format)
 
 
 class ExpectationManagerTest(unittest.TestCase):

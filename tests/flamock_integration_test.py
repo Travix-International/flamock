@@ -1,14 +1,20 @@
-import unittest
 import json
-import flamock
+import logging
+import unittest
+from flamock import logging_format
+from flamock import admin_path as flamock_admin_path
+from flamock import app as flamock_app
+
+logging.basicConfig(level=logging.DEBUG, format=logging_format)
 
 
 class FlamockTest(unittest.TestCase):
 
-    host = 'http://127.0.0.1:1080'
+    host = 'http://0.0.0.0:1080'
+
     def setUp(self):
-        flamock.app.config['TESTING'] = True
-        self.app = flamock.app.test_client()
+        flamock_app.config['TESTING'] = True
+        self.app = flamock_app.test_client()
         self.app.set_cookie('localhost', 'cookie1', 'cookie1_value')
         self.app.set_cookie('localhost', 'cookie2', 'cookie2_value')
 
@@ -57,11 +63,11 @@ class FlamockTest(unittest.TestCase):
             'priority': 0
         }
 
-        resp = self.app.post(self.host + '/' + flamock.admin_path + '/add_expectation',
+        resp = self.app.post(self.host + '/' + flamock_admin_path + '/add_expectation',
                              data=json.dumps(exp_fwd))
         self.assertEqual(resp.status_code, 200)
 
-        resp = self.app.post(self.host + '/' + flamock.admin_path + '/add_expectation',
+        resp = self.app.post(self.host + '/' + flamock_admin_path + '/add_expectation',
                              data=json.dumps(exp_resp))
         self.assertEqual(resp.status_code, 200)
 

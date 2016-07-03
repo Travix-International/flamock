@@ -1,8 +1,11 @@
 import unittest
-
+import logging
+from flamock import logging_format
 from custom_reponse import CustomResponse
 from expectation_manager import ExpectationManager
 from response_manager import ResponseManager
+
+logging.basicConfig(level=logging.DEBUG, format=logging_format)
 
 
 class ResponseManagerTest(unittest.TestCase):

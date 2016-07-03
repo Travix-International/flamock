@@ -1,14 +1,15 @@
 import logging
 from flask import Flask
 from flask import request
+from argparse import ArgumentParser
 from response_manager import ResponseManager
 from expectation_manager import ExpectationManager
 
 logging_format = '[%(asctime)s][%(funcName)s][%(lineno)d][%(levelname)s] %(message)s'
+admin_path = 'flamock'
+
 
 app = Flask(__name__)
-
-admin_path = 'flamock'
 
 
 @app.route('/%s/remove_all_expectations' % admin_path, methods=['POST'])
@@ -51,12 +52,17 @@ def hello_world(request_path):
 
 
 if __name__ == '__main__':
-    # logging.basicConfig(filename="flamock.log", level=logging.DEBUG, format=logging_format, filemode='w')
 
-    handler = logging.FileHandler('flamock3.log', 'w')
-    handler.setFormatter(logging.Formatter(logging_format))
-    handler.setLevel(logging.DEBUG)
-    logging.getLogger().setLevel(logging.DEBUG)
-    logging.getLogger().addHandler(handler)
+    argument_parser = ArgumentParser(description='Flamock')
 
-    app.run(debug=True, host='0.0.0.0', port=1080)
+    argument_parser.add_argument("-ll", "--loglevel",
+                                 type=int,
+                                 default=logging.INFO,
+                                 action="store",
+                                 required=False,
+                                 help="Log level 0-50. DEBUG = 10 , INFO = 20, CRITICAL = 50")
+
+    args = argument_parser.parse_args()
+    logging.basicConfig(level=args.loglevel, format=logging_format)
+
+    app.run(debug=(args.loglevel == logging.DEBUG), host='0.0.0.0', port=1080)
