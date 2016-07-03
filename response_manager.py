@@ -3,10 +3,10 @@ import logging
 import requests
 from urllib.parse import urlparse
 from expectation_manager import ExpectationManager
-from flask import Response as FlaskResponse
+from custom_reponse import CustomResponse
 
 
-class ResponseGenerator:
+class ResponseManager:
     """
     possible expectation fields:
      - request
@@ -44,14 +44,14 @@ class ResponseGenerator:
                 if 'request' not in expectation:
                     continue
 
-                if ResponseGenerator.is_expectation_match_request(expectation['request'], request):
+                if ResponseManager.is_expectation_match_request(expectation['request'], request):
                     if 'response' in expectation:
                         expected_response = expectation['response']
-                        return FlaskResponse(expected_response['body'], expected_response['httpcode'])
+                        return CustomResponse(expected_response['body'], expected_response['httpcode'])
 
                     if 'forward' in expectation:
                         cls.make_request(expectation['forward'], request)
-        return FlaskResponse("No expectation for request: \r\n " + str(request), 200)
+        return CustomResponse("No expectation for request: \r\n " + str(request))
 
     @classmethod
     def value_matcher(cls, expected_value, actual_value):
@@ -91,6 +91,6 @@ class ResponseGenerator:
     def do_action(cls, expectation):
         if 'response' in expectation:
             expected_response = expectation['response']
-            return FlaskResponse(expected_response['body'], expected_response['httpcode'])
+            return CustomResponse(expected_response['body'], expected_response['httpcode'])
         return None
 

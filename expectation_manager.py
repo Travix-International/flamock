@@ -1,6 +1,5 @@
 import hashlib
-from flask import Response as FlaskResponse
-
+from custom_reponse import CustomResponse
 
 class ExpectationManager:
     """
@@ -12,26 +11,47 @@ class ExpectationManager:
 
     @classmethod
     def remove_all(cls):
+        """
+
+        :return: custom response
+        """
         cls.expectations.clear()
-        return FlaskResponse("All expectations were removed", 200)
+        return CustomResponse("All expectations were removed")
 
     @classmethod
-    def get_expectations(cls):
+    def get_expectations_as_dict(cls):
+        """
+
+        :return: expectations as dict. Useful for inner operations
+        """
         return cls.expectations.copy()
 
     @classmethod
-    def remove(cls, key):
-        if key in cls.expectations:
-            del(cls.expectations[key])
-        return FlaskResponse("Expectation with key %s was removed" % key, 200)
+    def get_expectations_as_response(cls):
+        """
+
+        :return: Expectations as custom response
+        """
+        return CustomResponse(str(cls.expectations))
+
+    @classmethod
+    def remove(cls, dict_with_key):
+        """
+        Removes particular expectations
+        :param dict_with_key: dictionary with field 'key' and md5=value
+        :return: custom response
+        """
+        if 'key' in dict_with_key and dict_with_key['key'] in cls.expectations:
+            del(cls.expectations[dict_with_key['key']])
+        return CustomResponse("Expectation with key %s was removed" % dict_with_key)
 
     @classmethod
     def add(cls, expectation_as_dict):
         key = hashlib.md5(str(expectation_as_dict).encode()).hexdigest()
         if key not in cls.expectations:
             cls.expectations[key] = expectation_as_dict
-            return FlaskResponse("Expectation was added with key %s" % key, 200)
-        return FlaskResponse("Expectation was not added!", 200)
+            return CustomResponse("Expectation was added with key %s" % key)
+        return CustomResponse("Expectation was not added!")
 
     @classmethod
     def validate_expectation(cls, expectation_as_dict):

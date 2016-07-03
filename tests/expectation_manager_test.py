@@ -28,14 +28,14 @@ class ExpectationManagerTest(unittest.TestCase):
         exp = {'request': {'path': 'pathv2'}, 'response': {'httpcode': 200, 'body': "Mock answer!"}}
         resp = ExpectationManager.add(exp)
         self.assertEquals(200, resp.status_code)
-        items = ExpectationManager.get_expectations().items()
+        items = ExpectationManager.get_expectations_as_dict().items()
         self.assertEqual(len(items), 2)
 
         for key, value in items:
-            resp = ExpectationManager.remove(key)
+            resp = ExpectationManager.remove({'key': key})
             self.assertEquals(200, resp.status_code)
             break
-        items = ExpectationManager.get_expectations().items()
+        items = ExpectationManager.get_expectations_as_dict().items()
         self.assertEqual(len(items), 1)
 
     def test_030_remove_all(self):
@@ -45,10 +45,10 @@ class ExpectationManagerTest(unittest.TestCase):
         exp = {'request': {'path': 'pathv2'}, 'response': {'httpcode': 200, 'body': "Mock answer!"}}
         resp = ExpectationManager.add(exp)
         self.assertEquals(200, resp.status_code)
-        items = ExpectationManager.get_expectations().items()
+        items = ExpectationManager.get_expectations_as_dict().items()
         self.assertEqual(len(items), 2)
 
         resp = ExpectationManager.remove_all()
         self.assertEquals(200, resp.status_code)
-        items = ExpectationManager.get_expectations().items()
+        items = ExpectationManager.get_expectations_as_dict().items()
         self.assertEqual(len(items), 0)
