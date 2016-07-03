@@ -18,4 +18,4 @@ RUN pip3 install -r requirements.txt
 EXPOSE 1080
 
 ENTRYPOINT ["python3"]
-CMD ["flamock.py"]
+CMD ["-u","flamock.py"]
