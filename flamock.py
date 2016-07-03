@@ -52,10 +52,11 @@ def hello_world(request_path):
 
 if __name__ == '__main__':
     # logging.basicConfig(filename="flamock.log", level=logging.DEBUG, format=logging_format, filemode='w')
+
     handler = logging.FileHandler('/home/iryb/flamock/flamock3.log', 'w')
     handler.setFormatter(logging.Formatter(logging_format))
     handler.setLevel(logging.DEBUG)
     logging.getLogger().setLevel(logging.DEBUG)
     logging.getLogger().addHandler(handler)
 
-    app.run()
+    app.run(debug=True, host = '0.0.0.0', port=1080 )

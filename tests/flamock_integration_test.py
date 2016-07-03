@@ -5,7 +5,7 @@ import flamock
 
 class FlamockTest(unittest.TestCase):
 
-    host = 'http://127.0.0.1:5000'
+    host = 'http://127.0.0.1:1080'
     def setUp(self):
         flamock.app.config['TESTING'] = True
         self.app = flamock.app.test_client()
