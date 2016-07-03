@@ -1,5 +1,6 @@
 import json
 import hashlib
+import logging
 from requests.status_codes import codes
 from custom_reponse import CustomResponse
 
@@ -11,6 +12,7 @@ class ExpectationManager:
     todo: fix return types
     """
     expectations = {}  # dict with <md5: json_object>
+    logger = logging.getLogger()
 
     @classmethod
     def remove_all(cls):
@@ -19,6 +21,7 @@ class ExpectationManager:
         :return: custom response
         """
         cls.expectations.clear()
+        cls.logger.info("All expectations were removed")
         return CustomResponse("All expectations were removed")
 
     @classmethod
@@ -44,17 +47,23 @@ class ExpectationManager:
         :param dict_with_key: dictionary with field 'key' and md5=value
         :return: custom response
         """
+        cls.logger.debug("arg: %s" % str(dict_with_key))
         if 'key' in dict_with_key and dict_with_key['key'] in cls.expectations:
             del(cls.expectations[dict_with_key['key']])
-        return CustomResponse("Expectation with key %s was removed" % dict_with_key)
+            cls.logger.info("Expectation with key %s was removed" % dict_with_key)
+            return CustomResponse("Expectation with key %s was removed" % dict_with_key)
+        cls.logger.error("Expectation with key %s was NOT removed" % dict_with_key)
+        return CustomResponse("Error! Expectation with key %s was NOT removed" % dict_with_key, codes.bad)
 
     @classmethod
     def add(cls, expectation_as_dict):
         key = hashlib.md5(str(expectation_as_dict).encode()).hexdigest()
         if key not in cls.expectations:
             cls.expectations[key] = expectation_as_dict
+            cls.logger.info("Expectation was added with key %s" % key)
             return CustomResponse("Expectation was added with key %s" % key)
-        return CustomResponse("Expectation was not added!")
+        cls.logger.error("Expectation was not added!")
+        return CustomResponse("Error! Expectation was NOT added!", codes.bad)
 
     @classmethod
     def json_to_dict(cls, json_text):
@@ -62,5 +71,7 @@ class ExpectationManager:
         try:
             json_dict = json.loads(json_text)
         except Exception as e:
+            cls.logger.error("Error! Can't convert json to dict! Json %s" % json_text)
+            cls.logger.exception(e)
             return json_dict, CustomResponse("Error! Can't convert json to dict! Json %s\r\n. Exception: %s" % (json_text, str(e)), codes.bad)
         return json_dict, CustomResponse()

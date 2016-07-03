@@ -1,14 +1,10 @@
-import sys
 import json
 import unittest
-import logging
 from expectation_manager import ExpectationManager
-
-logging.getLogger().setLevel(logging.DEBUG)
-logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
-
+import tests.logging_debug_config
 
 class ExpectationManagerTest(unittest.TestCase):
+
     def setUp(self):
         ExpectationManager.expectations.clear()
 
@@ -67,3 +63,6 @@ class ExpectationManagerTest(unittest.TestCase):
         exp_dict, resp = ExpectationManager.json_to_dict(str(exp))
         self.assertEquals(400, resp.status_code)
         self.assertEquals(exp_dict, None)
+
+if __name__ == '__main__':
+    unittest.main()

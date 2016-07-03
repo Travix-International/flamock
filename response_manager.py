@@ -36,6 +36,7 @@ class ResponseManager:
 
     """
     re_flags = re.DOTALL
+    logger = logging.getLogger()
 
     @classmethod
     def generate_response(cls, request):
@@ -48,19 +49,28 @@ class ResponseManager:
         :param request: Any request into mock
         :return: custom response with result
         """
+        cls.logger.debug("Incoming request: %s" % request)
         expectations = ExpectationManager.get_expectations_as_dict()
         if len(expectations) > 0:
             for key, expectation in expectations.items():
                 if 'request' not in expectation:
+                    cls.logger.debug("Skip expectation: %s" % expectation)
                     continue
 
                 if ResponseManager.is_expectation_match_request(expectation['request'], request):
+                    cls.logger.debug("Matched expectation: %s" % expectation)
                     if 'response' in expectation:
                         expected_response = expectation['response']
                         return CustomResponse(expected_response['body'], expected_response['httpcode'])
 
                     if 'forward' in expectation:
-                        cls.make_request(expectation['forward'], request)
+                        return cls.make_request(expectation['forward'], request)
+                cls.logger.debug("Skip expectation: %s" % expectation)
+
+        else:
+            cls.logger.info("list of expectations is empty")
+
+        cls.logger.info("No expectation for request:\r\n" + str(request))
         return CustomResponse("No expectation for request:\r\n" + str(request))
 
     @classmethod
@@ -77,7 +87,7 @@ class ResponseManager:
             search_result = compiled_pattern.search(actual_value)
             return search_result is not None
         except TypeError as e:
-            logging.exception(e)
+            cls.logger.exception(e)
             return expected_value in actual_value
 
     @classmethod
@@ -91,16 +101,19 @@ class ResponseManager:
         if 'method' in request_exp:
             result = cls.value_matcher(request_exp['method'], request_act['method'])
             if result is False:
-                logging.warning('Difference in {attribute}. expected: {expected_value}, actual: {actual_value}'.format(
+                cls.logger.warning('Difference in {attribute}. expected: {expected_value}, actual: {actual_value}'.format(
                     attribute='method', expected_value=request_exp['method'], actual_value=request_act['method']))
                 return False
 
         if 'path' in request_exp:
             result = cls.value_matcher(request_exp['path'], request_act['path'])
             if result is False:
-                logging.warning('Difference in {attribute}. expected: {expected_value}, actual: {actual_value}'.format(
+                cls.logger.warning('Difference in {attribute}. expected: {expected_value}, actual: {actual_value}'.format(
                         attribute='path', expected_value=request_exp['path'], actual_value=request_act['path']))
                 return False
+
+        cls.logger.debug('Requests are match expected: {expected_value}, actual: {actual_value}'.format(
+                        expected_value=str(request_exp), actual_value=str(request_act)))
         return True
 
     @classmethod

@@ -1,13 +1,8 @@
-import sys
 import unittest
-import logging
 from custom_reponse import CustomResponse
 from expectation_manager import ExpectationManager
 from response_manager import ResponseManager
-
-logging.getLogger().setLevel(logging.DEBUG)
-logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
-
+import tests.logging_debug_config
 
 class ResponseManagerTest(unittest.TestCase):
 
@@ -63,3 +58,6 @@ class ResponseManagerTest(unittest.TestCase):
         resp = ResponseManager.make_request(exp_forward, req)
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(resp.text, "method: %s, url: %s" % (req['method'], '%s://%s%s' % (real_scheme, real_host, mock_path)))
+
+if __name__ == '__main__':
+    unittest.main()
