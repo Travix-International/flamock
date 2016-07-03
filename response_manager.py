@@ -31,7 +31,7 @@ class ResponseManager:
      - delay
      - remaining_times
      - unlimited
-     - priority # int. 0 - lowest priority, hight
+     - priority # int. 0 - lowest priority
 
     """
     re_flags = re.DOTALL
@@ -39,6 +39,12 @@ class ResponseManager:
 
     @classmethod
     def sort_expectation_list_according_priority(cls, list_of_expectations):
+        """
+        Sorts  list of dicts according key 'priority'.
+        0 - lowest priority. Item with highest priority will be as first element
+        :param list_of_expectations: list of dicts with key 'priority'
+        :return: sorted list of dicts. first element has the biggest 'priority'
+        """
         sorted_list = sorted(list_of_expectations,
                              key=lambda exp: exp['priority'] if 'priority' in exp else 0,
                              reverse=True)
@@ -46,6 +52,11 @@ class ResponseManager:
 
     @classmethod
     def get_matched_expectations_for_request(cls, request):
+        """
+        Gets list of all matched expectations for this request
+        :param request: incoming request
+        :return: list of all matched expectations in random order
+        """
         list_matched_expectations = []
         expectations = ExpectationManager.get_expectations_as_dict()
         if len(expectations) == 0:
@@ -62,13 +73,19 @@ class ResponseManager:
         return list_matched_expectations
 
     @classmethod
-    def apply_expectation_for_request(cls, expectation, request):
+    def apply_action_from_expectation_to_request(cls, expectation, request):
+        """
+        executes 'action' of expectation
+        :param expectation: expectation to be executed
+        :param request: incoming request
+        :return: custom response with result of action
+        """
         if 'response' in expectation:
             expected_response = expectation['response']
             return CustomResponse(expected_response['body'], expected_response['httpcode'])
 
         if 'forward' in expectation:
-            return cls.make_request(expectation['forward'], request)
+            return cls.make_request(expectation['forward'], request['method'], request['path'])
         return None
 
     @classmethod
@@ -88,7 +105,7 @@ class ResponseManager:
         if len(list_matched_expectations) > 0:
             expectation = cls.sort_expectation_list_according_priority(list_matched_expectations)[0]
             cls.logger.debug("Matched expectation: %s" % expectation)
-            response = cls.apply_expectation_for_request(expectation, request)
+            response = cls.apply_action_from_expectation_to_request(expectation, request)
         else:
             cls.logger.info("list of expectations is empty")
             response = CustomResponse("No expectation for request:\r\n" + str(request))
@@ -137,17 +154,17 @@ class ResponseManager:
         return True
 
     @classmethod
-    def make_request(cls, expectation_forward, request):
+    def make_request(cls, expectation_forward, request_method, request_path):
         """
         Makes request to 3rd party
         :param expectation_forward: description of forwarding request
         :param request: actual request is been forwarded
         :return: response from 3rd party as CustomResponse
         """
-        url_for_request = "%s://%s/%s" % (expectation_forward['scheme'], expectation_forward['host'], request['path'])
+        url_for_request = "%s://%s/%s" % (expectation_forward['scheme'], expectation_forward['host'], request_path)
         logging.debug("url_for_request: %s" % url_for_request)
         try:
-            resp = requests.request(method=request['method'], url=url_for_request)
+            resp = requests.request(method=request_method, url=url_for_request)
             cust_resp = CustomResponse(resp.text, resp.status_code)
         except Exception as e:
             logging.exception(e)
