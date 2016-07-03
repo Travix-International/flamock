@@ -17,5 +17,5 @@ RUN pip3 install -r requirements.txt
 # Expose ports
 EXPOSE 1080
 
-ENTRYPOINT ["python"]
+ENTRYPOINT ["python3"]
 CMD ["flamock.py"]
