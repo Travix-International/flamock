@@ -1,4 +1,5 @@
 import sys
+import json
 import unittest
 import logging
 from expectation_manager import ExpectationManager
@@ -52,3 +53,17 @@ class ExpectationManagerTest(unittest.TestCase):
         self.assertEquals(200, resp.status_code)
         items = ExpectationManager.get_expectations_as_dict().items()
         self.assertEqual(len(items), 0)
+
+    def test_040_json_to_dict_positive(self):
+        exp = {'request': {'path': 'pathv1'}, 'response': {'httpcode': 200, 'body': 'Mock answer!'}}
+        exp_dict, resp = ExpectationManager.json_to_dict(json.dumps(exp))
+        self.assertEquals(200, resp.status_code)
+        self.assertEquals(exp_dict['request'], exp['request'])
+        self.assertEquals(exp_dict['response']['httpcode'], exp['response']['httpcode'])
+        self.assertEquals(exp_dict['response']['body'], exp['response']['body'])
+
+    def test_050_json_to_dict_negative(self):
+        exp = "{'request': {'path': 'pathv1'}, 'response': {'httpcode': 200, 'body': 'Mock answer!'}}"
+        exp_dict, resp = ExpectationManager.json_to_dict(str(exp))
+        self.assertEquals(400, resp.status_code)
+        self.assertEquals(exp_dict, None)

@@ -1,5 +1,8 @@
+import json
 import hashlib
+from requests.status_codes import codes
 from custom_reponse import CustomResponse
+
 
 class ExpectationManager:
     """
@@ -54,6 +57,10 @@ class ExpectationManager:
         return CustomResponse("Expectation was not added!")
 
     @classmethod
-    def validate_expectation(cls, expectation_as_dict):
-        #todo
-        pass
+    def json_to_dict(cls, json_text):
+        json_dict = None
+        try:
+            json_dict = json.loads(json_text)
+        except Exception as e:
+            return json_dict, CustomResponse("Error! Can't convert json to dict! Json %s\r\n. Exception: %s" % (json_text, str(e)), codes.bad)
+        return json_dict, CustomResponse()

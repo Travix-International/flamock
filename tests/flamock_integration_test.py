@@ -1,8 +1,12 @@
 import unittest
 import requests
+import logging
 import json
 from flask import jsonify
 import uuid
+
+logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 
 class FlamockTest(unittest.TestCase):

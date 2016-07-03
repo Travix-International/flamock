@@ -1,6 +1,7 @@
 import sys
 import unittest
 import logging
+from custom_reponse import CustomResponse
 from expectation_manager import ExpectationManager
 from response_manager import ResponseManager
 
@@ -12,7 +13,7 @@ class ResponseManagerTest(unittest.TestCase):
 
     def test_010_no_expectation(self):
         req = {'path': 'pathv', 'headers': {'h1': 'hv1'}, 'body': 'bodyv', 'cookies': {'c1': 'cv1'}}
-        resp = ResponseManager.generate(req)
+        resp = ResponseManager.generate_response(req)
         self.assertEquals(200, resp.status_code)
         #self.assertIn('No expectation for request:'.encode(), resp.data)
         self.assertIn('No expectation for request:', resp.text)
@@ -25,7 +26,7 @@ class ResponseManagerTest(unittest.TestCase):
         req = {'path': 'pathv', 'headers': {'h1': 'hv1'}, 'body': 'bodyv', 'cookies': {'c1': 'cv1'}}
         exp = {'request': {'path': 'pathv'}, 'response': {'httpcode': 200, 'body': "Mock answer!"}}
         ExpectationManager.add(exp)
-        resp = ResponseManager.generate(req)
+        resp = ResponseManager.generate_response(req)
         self.assertEquals(200, resp.status_code)
         self.assertEquals('Mock answer!', resp.text)
 
@@ -45,7 +46,7 @@ class ResponseManagerTest(unittest.TestCase):
 
     @staticmethod
     def request_mock(method='', url=''):
-        return (method, url)
+        return CustomResponse("method: %s, url: %s" % (method, url), 302)
 
     def test_050_make_request(self):
         mock_host = 'mock_hostname.com'
@@ -59,6 +60,6 @@ class ResponseManagerTest(unittest.TestCase):
         import requests
         requests.request = ResponseManagerTest.request_mock
 
-        method, url = ResponseManager.make_request(exp_forward, req)
-        self.assertEqual(method, req['method'])
-        self.assertEqual(url, '%s://%s%s' % (real_scheme, real_host, mock_path))
+        resp = ResponseManager.make_request(exp_forward, req)
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.text, "method: %s, url: %s" % (req['method'], '%s://%s%s' % (real_scheme, real_host, mock_path)))
