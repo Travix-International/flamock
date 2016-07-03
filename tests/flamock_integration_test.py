@@ -24,10 +24,10 @@ class FlamockTest(unittest.TestCase):
     def test_020_configure_transparent_mock(self):
         fwd_host = 'real_hostname.com'
         fwd_scheme = 'https'
-        exp_forward = {'scheme': fwd_scheme, 'host': fwd_host}
+
         exp_resp = {
             'request': {
-                'path': '/folder/service.aspx',
+                'path': 'folder/service.aspx',
                 'body': '<session_id>123.*<'
             },
             'response': {
@@ -35,14 +35,23 @@ class FlamockTest(unittest.TestCase):
                 'body': "Mock answer!"
             }
         }
+        exp_fwd = {
+            'request': {
+                'path': 'folder/service.aspx'
+            },
+            'forward': {
+                'scheme': fwd_scheme,
+                'host': fwd_host
+            }
+        }
 
-        req_to_fwd = {'path': '/folder/service.aspx', 'headers': {'h1': 'hv1'}, 'body': '<session_id>5678</session_id>'}
+        req_to_fwd = {'path': 'folder/service.aspx', 'headers': {'h1': 'hv1'}, 'body': '<session_id>5678</session_id>'}
 
-        resp = requests.post(self.host + '/' + flamock.admin_path,
-                             data=json.dumps(exp_forward))
+        resp = requests.post(self.host + '/' + flamock.admin_path + '/add_expectation',
+                             data=json.dumps(exp_fwd))
         self.assertEqual(resp.status_code, 200)
 
-        resp = requests.post(self.host + '/' + flamock.admin_path,
+        resp = requests.post(self.host + '/' + flamock.admin_path + '/add_expectation',
                              data=json.dumps(exp_resp))
         self.assertEqual(resp.status_code, 200)
 

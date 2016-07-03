@@ -1,6 +1,7 @@
 import re
 import logging
 import requests
+from requests.status_codes import codes
 from urllib.parse import urlparse
 from expectation_manager import ExpectationManager
 from custom_reponse import CustomResponse
@@ -124,11 +125,15 @@ class ResponseManager:
         :param request: actual request is been forwarded
         :return: response from 3rd party as CustomResponse
         """
-        url = "%s://%s" % (expectation_forward['scheme'], expectation_forward['host'])
-        url_obj = urlparse(request['path'])
-        url_for_request = request['path'].replace("%s://%s" % (url_obj.scheme, url_obj.netloc), "%s://%s" % (expectation_forward['scheme'], expectation_forward['host']) )
-        resp = requests.request(method=request['method'], url=url_for_request)
-        return CustomResponse(resp.text, resp.status_code)
+        url_for_request = "%s://%s/%s" % (expectation_forward['scheme'], expectation_forward['host'],request['path'])
+        logging.debug("url_for_request: %s" % url_for_request)
+        try:
+            resp = requests.request(method=request['method'], url=url_for_request)
+            cust_resp = CustomResponse(resp.text, resp.status_code)
+        except Exception as e:
+            logging.exception(e)
+            cust_resp = CustomResponse(str(e), codes.not_found)
+        return cust_resp
 
     @classmethod
     def do_action(cls, expectation):

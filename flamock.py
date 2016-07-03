@@ -17,7 +17,7 @@ def admin_remove_all_expectations():
 
 @app.route('/%s/remove_expectation' % admin_path, methods=['POST'])
 def admin_remove_expectation():
-    req_data_dict, resp = ExpectationManager.json_to_dict(request.data)
+    req_data_dict, resp = ExpectationManager.json_to_dict(request.data.decode())
     if req_data_dict is None and resp.staus_code != 200:
         return resp.to_flask_response()
 
@@ -31,8 +31,8 @@ def admin_get_expectations():
 
 @app.route('/%s/add_expectation' % admin_path, methods=['POST'])
 def admin_add_expectation():
-    req_data_dict, resp = ExpectationManager.json_to_dict(request.data)
-    if req_data_dict is None and resp.staus_code != 200:
+    req_data_dict, resp = ExpectationManager.json_to_dict(request.data.decode())
+    if req_data_dict is None and resp.status_code != 200:
         return resp.to_flask_response()
 
     return ExpectationManager.add(req_data_dict).to_flask_response()
@@ -41,7 +41,7 @@ def admin_add_expectation():
 @app.route('/', defaults={'request_path': ''},methods=['GET', 'POST'])
 @app.route('/<path:request_path>', methods=['GET', 'POST'])
 def hello_world(request_path):
-    req = {'path': request_path, 'headers': request.headers, 'body': request.data, 'cookies': request.cookies}
+    req = {'method': request.method, 'path': request_path, 'headers': request.headers, 'body': request.data, 'cookies': request.cookies}
     return ResponseManager.generate_response(req).to_flask_response()
 
 
