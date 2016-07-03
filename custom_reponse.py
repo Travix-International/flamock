@@ -20,3 +20,18 @@ class CustomResponse(object):
     def to_flask_response(self):
         from flask import Response as FlaskResponse
         return FlaskResponse(self._text, self._status_code)
+    '''
+    def to_falcon_response(self):
+        import falcon.status_codes
+
+        code_name = "HTTP_%s" % self._status_code
+        falcon_code = getattr(falcon.status_codes, code_name)
+
+        from falcon.response import Response
+        resp = Response()
+        resp.status = falcon_code
+        resp.body = self._text
+
+        return resp
+    '''
+
