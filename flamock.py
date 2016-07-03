@@ -10,6 +10,7 @@ app = Flask(__name__)
 
 admin_path = 'flamock'
 
+
 @app.route('/%s/remove_all_expectations' % admin_path, methods=['POST'])
 def admin_remove_all_expectations():
     return ExpectationManager.remove_all().to_flask_response()
@@ -38,15 +39,19 @@ def admin_add_expectation():
     return ExpectationManager.add(req_data_dict).to_flask_response()
 
 
-@app.route('/', defaults={'request_path': ''},methods=['GET', 'POST'])
+@app.route('/', defaults={'request_path': ''}, methods=['GET', 'POST'])
 @app.route('/<path:request_path>', methods=['GET', 'POST'])
 def hello_world(request_path):
-    req = {'method': request.method, 'path': request_path, 'headers': request.headers, 'body': request.data, 'cookies': request.cookies}
+    req = {'method': request.method,
+           'path': request_path,
+           'headers': request.headers,
+           'body': request.data.decode(),
+           'cookies': request.cookies}
     return ResponseManager.generate_response(req).to_flask_response()
 
 
 if __name__ == '__main__':
-    #logging.basicConfig(filename="flamock.log", level=logging.DEBUG, format=logging_format, filemode='w')
+    # logging.basicConfig(filename="flamock.log", level=logging.DEBUG, format=logging_format, filemode='w')
     handler = logging.FileHandler('/home/iryb/flamock/flamock3.log', 'w')
     handler.setFormatter(logging.Formatter(logging_format))
     handler.setLevel(logging.DEBUG)

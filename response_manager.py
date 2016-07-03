@@ -2,7 +2,6 @@ import re
 import logging
 import requests
 from requests.status_codes import codes
-from urllib.parse import urlparse
 from expectation_manager import ExpectationManager
 from custom_reponse import CustomResponse
 
@@ -29,15 +28,48 @@ class ResponseManager:
      - - httpcode
      - - headers
      - - body
-
-     - misc
-     - - delay
-     - - remaining_times
-     - - unlimited
+     - delay
+     - remaining_times
+     - unlimited
+     - priority # int. 0 - lowest priority, hight
 
     """
     re_flags = re.DOTALL
     logger = logging.getLogger()
+
+    @classmethod
+    def sort_expectation_list_according_priority(cls, list_of_expectations):
+        sorted_list = sorted(list_of_expectations,
+                             key=lambda exp: exp['priority'] if 'priority' in exp else 0,
+                             reverse=True)
+        return sorted_list
+
+    @classmethod
+    def get_matched_expectations_for_request(cls, request):
+        list_matched_expectations = []
+        expectations = ExpectationManager.get_expectations_as_dict()
+        if len(expectations) == 0:
+            return list_matched_expectations
+
+        for key, expectation in expectations.items():
+            if 'request' not in expectation:
+                cls.logger.debug("Not found 'request' in expectation. Skip expectation: %s" % expectation)
+                continue
+
+            if cls.is_expectation_match_request(expectation['request'], request):
+                list_matched_expectations.append(expectation)
+        logging.debug("Count of matched expectations: %s" % len(list_matched_expectations))
+        return list_matched_expectations
+
+    @classmethod
+    def apply_expectation_for_request(cls, expectation, request):
+        if 'response' in expectation:
+            expected_response = expectation['response']
+            return CustomResponse(expected_response['body'], expected_response['httpcode'])
+
+        if 'forward' in expectation:
+            return cls.make_request(expectation['forward'], request)
+        return None
 
     @classmethod
     def generate_response(cls, request):
@@ -51,28 +83,17 @@ class ResponseManager:
         :return: custom response with result
         """
         cls.logger.debug("Incoming request: %s" % request)
-        expectations = ExpectationManager.get_expectations_as_dict()
-        if len(expectations) > 0:
-            for key, expectation in expectations.items():
-                if 'request' not in expectation:
-                    cls.logger.debug("Skip expectation: %s" % expectation)
-                    continue
+        list_matched_expectations = cls.get_matched_expectations_for_request(request)
 
-                if ResponseManager.is_expectation_match_request(expectation['request'], request):
-                    cls.logger.debug("Matched expectation: %s" % expectation)
-                    if 'response' in expectation:
-                        expected_response = expectation['response']
-                        return CustomResponse(expected_response['body'], expected_response['httpcode'])
-
-                    if 'forward' in expectation:
-                        return cls.make_request(expectation['forward'], request)
-                cls.logger.debug("Skip expectation: %s" % expectation)
-
+        if len(list_matched_expectations) > 0:
+            expectation = cls.sort_expectation_list_according_priority(list_matched_expectations)[0]
+            cls.logger.debug("Matched expectation: %s" % expectation)
+            response = cls.apply_expectation_for_request(expectation, request)
         else:
             cls.logger.info("list of expectations is empty")
+            response = CustomResponse("No expectation for request:\r\n" + str(request))
 
-        cls.logger.info("No expectation for request:\r\n" + str(request))
-        return CustomResponse("No expectation for request:\r\n" + str(request))
+        return response
 
     @classmethod
     def value_matcher(cls, expected_value, actual_value):
@@ -99,19 +120,17 @@ class ResponseManager:
         :param request_act: actual request
         :return: True if all fields of actual request are match to particular expected request
         """
-        if 'method' in request_exp:
-            result = cls.value_matcher(request_exp['method'], request_act['method'])
-            if result is False:
-                cls.logger.warning('Difference in {attribute}. expected: {expected_value}, actual: {actual_value}'.format(
-                    attribute='method', expected_value=request_exp['method'], actual_value=request_act['method']))
-                return False
+        list_of_attributes_to_compare = ['method', 'path', 'body']
 
-        if 'path' in request_exp:
-            result = cls.value_matcher(request_exp['path'], request_act['path'])
-            if result is False:
-                cls.logger.warning('Difference in {attribute}. expected: {expected_value}, actual: {actual_value}'.format(
-                        attribute='path', expected_value=request_exp['path'], actual_value=request_act['path']))
-                return False
+        for attr in list_of_attributes_to_compare:
+            if attr in request_exp:
+                result = cls.value_matcher(request_exp[attr], request_act[attr])
+                if result is False:
+                    cls.logger.warning(
+                        'Difference in {attribute}. expected: {expected_value}, actual: {actual_value}'.format(
+                            attribute=attr, expected_value=request_exp[attr], actual_value=request_act[attr])
+                    )
+                    return False
 
         cls.logger.debug('Requests are match expected: {expected_value}, actual: {actual_value}'.format(
                         expected_value=str(request_exp), actual_value=str(request_act)))
@@ -125,7 +144,7 @@ class ResponseManager:
         :param request: actual request is been forwarded
         :return: response from 3rd party as CustomResponse
         """
-        url_for_request = "%s://%s/%s" % (expectation_forward['scheme'], expectation_forward['host'],request['path'])
+        url_for_request = "%s://%s/%s" % (expectation_forward['scheme'], expectation_forward['host'], request['path'])
         logging.debug("url_for_request: %s" % url_for_request)
         try:
             resp = requests.request(method=request['method'], url=url_for_request)

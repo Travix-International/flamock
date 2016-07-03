@@ -1,8 +1,9 @@
 import unittest
+
 from custom_reponse import CustomResponse
 from expectation_manager import ExpectationManager
 from response_manager import ResponseManager
-import tests.logging_debug_config
+
 
 class ResponseManagerTest(unittest.TestCase):
 
@@ -10,7 +11,7 @@ class ResponseManagerTest(unittest.TestCase):
         req = {'path': 'pathv', 'headers': {'h1': 'hv1'}, 'body': 'bodyv', 'cookies': {'c1': 'cv1'}}
         resp = ResponseManager.generate_response(req)
         self.assertEquals(200, resp.status_code)
-        #self.assertIn('No expectation for request:'.encode(), resp.data)
+        # self.assertIn('No expectation for request:'.encode(), resp.data)
         self.assertIn('No expectation for request:', resp.text)
         self.assertIn('pathv', resp.text)
         self.assertIn("'h1': 'hv1'", resp.text)
@@ -44,8 +45,6 @@ class ResponseManagerTest(unittest.TestCase):
         return CustomResponse("method: %s, url: %s" % (method, url), 302)
 
     def test_050_make_request(self):
-        mock_host = 'mock_hostname.com'
-        mock_scheme = 'http'
         mock_path = 'subp1/subp2.aspx'
         real_host = 'real_hostname.com'
         real_scheme = 'https'
@@ -57,7 +56,8 @@ class ResponseManagerTest(unittest.TestCase):
 
         resp = ResponseManager.make_request(exp_forward, req)
         self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp.text, "method: %s, url: %s" % (req['method'], '%s://%s/%s' % (real_scheme, real_host, mock_path)))
+        self.assertEqual(resp.text,
+                         "method: %s, url: %s" % (req['method'], '%s://%s/%s' % (real_scheme, real_host, mock_path)))
 
     def test_060_request_mathces_forward(self):
         mock_path = 'subp1/subp2.aspx'
@@ -75,6 +75,25 @@ class ResponseManagerTest(unittest.TestCase):
         resp = ResponseManager.generate_response(req)
 
         self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp.text, "method: %s, url: %s" % (req['method'], '%s://%s/%s' % (fwd_scheme, fwd_host, mock_path)))
+        self.assertEqual(resp.text,
+                         "method: %s, url: %s" % (req['method'], '%s://%s/%s' % (fwd_scheme, fwd_host, mock_path)))
+
+    def test_060_priority_sort_test(self):
+            list_of_exp = [
+                {'priority': 1},
+                {'priority': 3},
+                {'priority': 2},
+                {'not_priority': 0},
+            ]
+            expected_list = [
+                {'priority': 3},
+                {'priority': 2},
+                {'priority': 1},
+                {'not_priority': 0},
+            ]
+            sorted_list = ResponseManager.sort_expectation_list_according_priority(list_of_exp)
+            self.assertEquals(sorted_list, expected_list)
+
 if __name__ == '__main__':
     unittest.main()
+

@@ -1,7 +1,8 @@
 import json
 import unittest
+
 from expectation_manager import ExpectationManager
-import tests.logging_debug_config
+
 
 class ExpectationManagerTest(unittest.TestCase):
 
@@ -12,10 +13,9 @@ class ExpectationManagerTest(unittest.TestCase):
         exp = {'request': {'path': 'pathv'}, 'response': {'httpcode': 200, 'body': "Mock answer!"}}
         resp = ExpectationManager.add(exp)
         self.assertEquals(200, resp.status_code)
-        items = ExpectationManager.expectations.items()
-        self.assertEqual(len(items), 1)
+        self.assertEqual(len(ExpectationManager.expectations), 1)
 
-        for key, value in items:
+        for key, value in ExpectationManager.expectations.items():
             self.assertEqual(exp, value)
 
     def test_020_remove(self):

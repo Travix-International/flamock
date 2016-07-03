@@ -1,5 +1,6 @@
 from requests.status_codes import codes
 
+
 class CustomResponse(object):
     _status_code = codes.ok
     _text = ''
@@ -18,4 +19,4 @@ class CustomResponse(object):
 
     def to_flask_response(self):
         from flask import Response as FlaskResponse
-        return FlaskResponse(self._text, self._status_code )
+        return FlaskResponse(self._text, self._status_code)

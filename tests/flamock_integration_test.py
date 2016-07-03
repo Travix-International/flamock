@@ -1,8 +1,10 @@
 import unittest
-import requests
-import flamock
 import json
-import tests.logging_debug_config
+
+import requests
+
+import flamock
+
 
 class FlamockTest(unittest.TestCase):
 
@@ -33,7 +35,8 @@ class FlamockTest(unittest.TestCase):
             'response': {
                 'httpcode': 200,
                 'body': "Mock answer!"
-            }
+            },
+            'priority': 1
         }
         exp_fwd = {
             'request': {
@@ -42,10 +45,9 @@ class FlamockTest(unittest.TestCase):
             'forward': {
                 'scheme': fwd_scheme,
                 'host': fwd_host
-            }
+            },
+            'priority': 0
         }
-
-        req_to_fwd = {'path': 'folder/service.aspx', 'headers': {'h1': 'hv1'}, 'body': '<session_id>5678</session_id>'}
 
         resp = requests.post(self.host + '/' + flamock.admin_path + '/add_expectation',
                              data=json.dumps(exp_fwd))
