@@ -4,9 +4,10 @@ from flask import request
 from argparse import ArgumentParser
 from response_manager import ResponseManager
 from expectation_manager import ExpectationManager
+from custom_reponse import CustomResponse
 
 logging_format = '[%(asctime)s][%(funcName)s][%(lineno)d][%(levelname)s] %(message)s'
-admin_path = 'flamock'
+admin_path = 'mock_admin'
 
 
 app = Flask(__name__)
@@ -38,6 +39,18 @@ def admin_add_expectation():
         return resp.to_flask_response()
 
     return ExpectationManager.add(req_data_dict).to_flask_response()
+
+
+@app.route('/%s/status' % admin_path, methods=['GET'])
+def admin_status():
+    return ExpectationManager.status().to_flask_response()
+
+
+# temporary - responce for status request
+# TODO: move it to admin only
+@app.route('/status', methods=['GET'])
+def status():
+    return CustomResponse("OK").to_flask_response()
 
 
 @app.route('/', defaults={'request_path': ''}, methods=['GET', 'POST'])

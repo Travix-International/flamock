@@ -76,3 +76,7 @@ class ExpectationManager:
             return json_dict, CustomResponse("Error! Can't convert json to dict! Json %s\r\n"
                                              "Exception: %s" % (json_text, str(e)), codes.bad)
         return json_dict, CustomResponse()
+
+    @classmethod
+    def status(cls):
+        return CustomResponse("OK")

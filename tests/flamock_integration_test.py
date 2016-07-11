@@ -22,7 +22,19 @@ class FlamockTest(unittest.TestCase):
         self.app.delete_cookie('localhost', 'cookie1')
         self.app.delete_cookie('localhost', 'cookie2')
 
-    def test_010_no_expectation_get_headers_and_cookies(self):
+    def test_005_check_status_temp(self):
+        resp = self.app.get(self.host + '/status')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEquals('OK', resp.data.decode())
+
+    def test_010_check_status(self):
+        resp = self.app.get(self.host + '/' + flamock_admin_path + '/status')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEquals('OK', resp.data.decode())
+
+    def test_020_no_expectation_get_headers_and_cookies(self):
         path = 'a/b/c'
 
         resp = self.app.get(self.host + '/' + path,
@@ -37,7 +49,7 @@ class FlamockTest(unittest.TestCase):
         self.assertIn("'cookie1': 'cookie1_value'", resp_text)
         self.assertIn("'cookie2': 'cookie2_value'", resp_text)
 
-    def test_020_configure_transparent_mock(self):
+    def test_030_configure_transparent_mock(self):
         fwd_host = 'real_hostname.com'
         fwd_scheme = 'https'
 
