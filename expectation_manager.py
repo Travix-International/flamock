@@ -57,13 +57,16 @@ class ExpectationManager:
 
     @classmethod
     def add(cls, expectation_as_dict):
-        key = hashlib.md5(str(expectation_as_dict).encode()).hexdigest()
-        if key not in cls.expectations:
-            cls.expectations[key] = expectation_as_dict
-            cls.logger.info("Expectation was added with key %s" % key)
-            return CustomResponse("Expectation was added with key %s" % key)
-        cls.logger.error("Expectation was not added!")
-        return CustomResponse("Error! Expectation was NOT added!", codes.bad)
+        if 'key' in expectation_as_dict:
+            key = expectation_as_dict['key']
+        else:
+            key = hashlib.md5(str(expectation_as_dict).encode()).hexdigest()
+
+        if key in cls.expectations:
+            cls.logger.warning("Expectation with key %s already exists. Expectation will be updated" % key)
+
+        cls.expectations[key] = expectation_as_dict
+        return CustomResponse("Expectation has been added with key %s" % key)
 
     @classmethod
     def json_to_dict(cls, json_text):

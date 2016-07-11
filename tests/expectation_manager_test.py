@@ -68,5 +68,36 @@ class ExpectationManagerTest(unittest.TestCase):
         self.assertEquals(400, resp.status_code)
         self.assertEquals(exp_dict, None)
 
+    def test_060_add_expectation_with_key(self):
+        custom_key = 'custom_key'
+        exp = {'key': custom_key, 'request': {'path': 'pathv1'}, 'response': {'httpcode': 200, 'body': "Mock answer!"}}
+        resp = ExpectationManager.add(exp)
+        self.assertEquals(200, resp.status_code)
+        items = ExpectationManager.get_expectations_as_dict().items()
+        self.assertEqual(len(items), 1)
+
+        resp = ExpectationManager.remove({'key': custom_key})
+        self.assertEquals(200, resp.status_code)
+
+        items = ExpectationManager.get_expectations_as_dict().items()
+        self.assertEqual(len(items), 0)
+
+    def test_070_update_existing_expectation(self):
+        exp1 = {'key': 'custom_key', 'request': {'path': 'pathv1'}}
+        resp = ExpectationManager.add(exp1)
+        self.assertEquals(200, resp.status_code)
+
+        exp2 = {'key': 'custom_key', 'request': {'path': 'pathv2'}}
+        resp = ExpectationManager.add(exp2)
+        self.assertEquals(200, resp.status_code)
+
+        items = ExpectationManager.get_expectations_as_dict().items()
+        self.assertEqual(len(items), 1)
+
+        for key, value in items:
+            self.assertEqual(exp2, value)
+
+
+
 if __name__ == '__main__':
     unittest.main()
