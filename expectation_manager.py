@@ -63,10 +63,10 @@ class ExpectationManager:
             key = hashlib.md5(str(expectation_as_dict).encode()).hexdigest()
 
         if key in cls.expectations:
-            cls.logger.warning("Expectation with key %s already exists. Expectation will be updated" % key)
+            cls.logger.warning("Expectation with key '%s' already exists. Expectation will be updated" % key)
 
         cls.expectations[key] = expectation_as_dict
-        return CustomResponse("Expectation has been added with key %s" % key)
+        return CustomResponse("Expectation has been added with key '%s'" % key)
 
     @classmethod
     def json_to_dict(cls, json_text):

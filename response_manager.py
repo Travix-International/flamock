@@ -99,7 +99,7 @@ class ResponseManager:
         :param request: Any request into mock
         :return: custom response with result
         """
-        cls.logger.debug("Incoming request:\r\n%s" % request)
+        cls.logger.info("Request:\r\n%s" % request)
         list_matched_expectations = cls.get_matched_expectations_for_request(request)
 
         if len(list_matched_expectations) > 0:
@@ -107,9 +107,9 @@ class ResponseManager:
             cls.logger.debug("Matched expectation: %s" % expectation)
             response = cls.apply_action_from_expectation_to_request(expectation, request)
         else:
-            cls.logger.info("list of expectations is empty")
+            cls.logger.warning("List of expectations is empty!")
             response = CustomResponse("No expectation for request:\r\n" + str(request))
-        logging.debug(str(response))
+        logging.info("Response:\r\n%s" % response)
         return response
 
     @classmethod
@@ -143,7 +143,7 @@ class ResponseManager:
             if attr in request_exp:
                 result = cls.value_matcher(request_exp[attr], request_act[attr])
                 if result is False:
-                    cls.logger.warning(
+                    cls.logger.debug(
                         'Difference in {attribute}. expected: {expected_value}, actual: {actual_value}'.format(
                             attribute=attr, expected_value=request_exp[attr], actual_value=request_act[attr])
                     )
