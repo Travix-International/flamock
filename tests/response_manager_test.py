@@ -1,11 +1,18 @@
 import unittest
 import logging
+import requests
 from flamock import logging_format
 from custom_reponse import CustomResponse
 from expectation_manager import ExpectationManager
 from response_manager import ResponseManager
 
 logging.basicConfig(level=logging.DEBUG, format=logging_format)
+
+
+def request_mock(method='', url='', data=''):
+    return CustomResponse("method: %s, url: %s, body: %s" % (method, url, data), 302)
+
+requests.request = request_mock
 
 
 class ResponseManagerTest(unittest.TestCase):
@@ -46,43 +53,37 @@ class ResponseManagerTest(unittest.TestCase):
         exp_request = {'body': 'b.dy.onte.t'}
         self.assertTrue(ResponseManager.is_expectation_match_request(exp_request, req))
 
-    @staticmethod
-    def request_mock(method='', url=''):
-        return CustomResponse("method: %s, url: %s" % (method, url), 302)
-
     def test_050_make_request(self):
-        req_method = 'GET'
-        req_path = 'subp1/subp2.aspx'
+        req = {'method': 'POST', 'path': 'subp1/subp2.aspx', 'body': 'bodycontent'}
         real_host = 'real_hostname.com'
         real_scheme = 'https'
 
         exp_forward = {'scheme': real_scheme, 'host': real_host}
-        import requests
-        requests.request = ResponseManagerTest.request_mock
-
-        resp = ResponseManager.make_request(exp_forward, req_method, req_path)
+        resp = ResponseManager.make_request(exp_forward, req)
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(resp.text,
-                         "method: %s, url: %s" % (req_method, '%s://%s/%s' % (real_scheme, real_host, req_path)))
+                         "method: %s, url: %s, body: %s"
+                         % (
+                             req['method'],
+                             '%s://%s/%s' % (real_scheme, real_host, req['path']),
+                             req['body'])
+                         )
 
     def test_060_request_matches_forward(self):
-        mock_path = 'subp1/subp2.aspx'
-        fwd_host = 'real_hostname.com'
-        fwd_scheme = 'https'
-
-        req = {'method': 'GET', 'path': mock_path, 'body': 'bodycontent'}
-        exp = {'request': {'path': 'subp1/subp2.aspx'}, 'forward': {'scheme': fwd_scheme, 'host': fwd_host}}
+        req = {'method': 'GET', 'path': 'subp1/subp2.aspx', 'body': 'bodycontent'}
+        exp = {'request': {'path': 'subp1/subp2.aspx'}, 'forward': {'scheme': 'https', 'host': 'real_hostname.com'}}
         resp = ExpectationManager.add(exp)
         self.assertEquals(resp.status_code, 200)
-
-        import requests
-        requests.request = ResponseManagerTest.request_mock
 
         resp = ResponseManager.generate_response(req)
 
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(resp.text,
-                         "method: %s, url: %s" % (req['method'], '%s://%s/%s' % (fwd_scheme, fwd_host, mock_path)))
+                         "method: %s, url: %s, body: %s" % (
+                             req['method'],
+                             '%s://%s/%s' % (exp['forward']['scheme'], exp['forward']['host'], req['path']),
+                             req['body'])
+                         )
 
     def test_060_priority_sort_test(self):
             list_of_exp = [
@@ -100,10 +101,6 @@ class ResponseManagerTest(unittest.TestCase):
             sorted_list = ResponseManager.sort_expectation_list_according_priority(list_of_exp)
             self.assertEquals(sorted_list, expected_list)
 
-    @staticmethod
-    def make_request_mock(expectation_forward, request_method, request_path):
-        return CustomResponse(expectation_forward['body'], expectation_forward['httpcode'])
-
     def test_070_apply_action_from_expectation_to_request_response_test(self):
             exp_resp = {'response': {'body': 'RSP', 'httpcode': 203}}
 
@@ -112,15 +109,17 @@ class ResponseManagerTest(unittest.TestCase):
             self.assertEquals(cust_resp.text, exp_resp['response']['body'])
 
     def test_080_apply_action_from_expectation_to_forward_test(self):
-            exp_fwd = {'forward': {'body': 'FWD', 'httpcode': 302}}
-            req_method = 'GET'
-            req_path = 'sub1/sub2.xt'
-            req = {'method': req_method, 'path': req_path}
+            exp = {'forward': {'scheme': 'https', 'host': 'fwd_host'}}
+            req = {'method': 'GET', 'path': 'sub1/sub2.xt'}
 
-            ResponseManager.make_request = self.make_request_mock
-            cust_resp = ResponseManager.apply_action_from_expectation_to_request(exp_fwd, req)
-            self.assertEquals(cust_resp.status_code, exp_fwd['forward']['httpcode'])
-            self.assertEquals(cust_resp.text, exp_fwd['forward']['body'])
+            cust_resp = ResponseManager.apply_action_from_expectation_to_request(exp, req)
+            self.assertEquals(cust_resp.status_code, 302)
+            self.assertEquals(cust_resp.text,
+                              "method: %s, url: %s, body: %s" % (
+                                  req['method'],
+                                  '%s://%s/%s' % (exp['forward']['scheme'], exp['forward']['host'], req['path']),
+                                  '')
+                              )
 
     def test_090_empty_expectation_response_default_values(self):
             req = {'path': 'pathv'}

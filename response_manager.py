@@ -87,7 +87,7 @@ class ResponseManager:
             return CustomResponse(response_body, response_code)
 
         if 'forward' in expectation:
-            return cls.make_request(expectation['forward'], request['method'], request['path'])
+            return cls.make_request(expectation['forward'], request)
         return None
 
     @classmethod
@@ -156,17 +156,21 @@ class ResponseManager:
         return True
 
     @classmethod
-    def make_request(cls, expectation_forward, request_method, request_path):
+    def make_request(cls, expectation_forward, request):
         """
         Makes request to 3rd party
         :param expectation_forward: description of forwarding request
         :param request: actual request is been forwarded
         :return: response from 3rd party as CustomResponse
         """
+        request_method = request['method'] if 'method' in request else 'GET'
+        request_path = request['path'] if 'path' in request else '/'
+        request_body = request['body'] if 'body' in request else ''
+
         url_for_request = "%s://%s/%s" % (expectation_forward['scheme'], expectation_forward['host'], request_path)
-        logging.debug("url_for_request: %s" % url_for_request)
+        logging.debug("make request: %s %s body: %s" % (request_method, url_for_request, request_body))
         try:
-            resp = requests.request(method=request_method, url=url_for_request)
+            resp = requests.request(method=request_method, url=url_for_request, data=request_body)
             cust_resp = CustomResponse(resp.text, resp.status_code)
         except Exception as e:
             logging.exception(e)
