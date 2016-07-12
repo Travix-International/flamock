@@ -22,12 +22,6 @@ class FlamockTest(unittest.TestCase):
         self.app.delete_cookie('localhost', 'cookie1')
         self.app.delete_cookie('localhost', 'cookie2')
 
-    def test_005_check_status_temp(self):
-        resp = self.app.get(self.host + '/status')
-
-        self.assertEqual(resp.status_code, 200)
-        self.assertEquals('OK', resp.data.decode())
-
     def test_010_check_status(self):
         resp = self.app.get(self.host + '/' + flamock_admin_path + '/status')
 

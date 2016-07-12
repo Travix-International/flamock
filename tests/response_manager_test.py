@@ -10,6 +10,9 @@ logging.basicConfig(level=logging.DEBUG, format=logging_format)
 
 class ResponseManagerTest(unittest.TestCase):
 
+    def setUp(self):
+        ExpectationManager.remove_all()
+
     def test_010_no_expectation(self):
         req = {'path': 'pathv', 'headers': {'h1': 'hv1'}, 'body': 'bodyv', 'cookies': {'c1': 'cv1'}}
         resp = ResponseManager.generate_response(req)
@@ -118,6 +121,14 @@ class ResponseManagerTest(unittest.TestCase):
             cust_resp = ResponseManager.apply_action_from_expectation_to_request(exp_fwd, req)
             self.assertEquals(cust_resp.status_code, exp_fwd['forward']['httpcode'])
             self.assertEquals(cust_resp.text, exp_fwd['forward']['body'])
+
+    def test_090_empty_expectation_response_default_values(self):
+            req = {'path': 'pathv'}
+            exp = {'request': {'path': 'pathv'}, 'response': {}}
+            ExpectationManager.add(exp)
+            resp = ResponseManager.generate_response(req)
+            self.assertEquals(200, resp.status_code)
+            self.assertEquals('', resp.text)
 
 if __name__ == '__main__':
     unittest.main()

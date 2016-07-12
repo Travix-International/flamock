@@ -82,7 +82,9 @@ class ResponseManager:
         """
         if 'response' in expectation:
             expected_response = expectation['response']
-            return CustomResponse(expected_response['body'], expected_response['httpcode'])
+            response_body = expected_response['body'] if 'body' in expected_response else ""
+            response_code = expected_response['httpcode'] if 'httpcode' in expected_response else 200
+            return CustomResponse(response_body, response_code)
 
         if 'forward' in expectation:
             return cls.make_request(expectation['forward'], request['method'], request['path'])
