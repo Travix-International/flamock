@@ -173,15 +173,19 @@ class ResponseManager:
 
         url_for_request = "%s://%s/%s" % (expectation_forward['scheme'], expectation_forward['host'], request_path)
 
-        forward_headers = []
+        forward_headers = {}
         for key, value in request_headers:
             if key not in headers_to_ignore:
-                forward_headers += [(key, value)]
+                forward_headers[key] = value
 
         logging.info("Make forward request: %s %s body: %s headers: %s" % (
             request_method, url_for_request, request_body, forward_headers))
         try:
-            resp = requests.request(method=request_method, url=url_for_request, data=request_body, headers=forward_headers)
+            resp = requests.request(
+                method=request_method,
+                url=url_for_request,
+                data=request_body,
+                headers=forward_headers)
             cust_resp = CustomResponse(resp.text, resp.status_code)
         except Exception as e:
             logging.exception(e)

@@ -70,7 +70,7 @@ class ResponseManagerTest(unittest.TestCase):
                              req['method'],
                              '%s://%s/%s' % (real_scheme, real_host, req['path']),
                              req['body'],
-                             req['headers'])
+                             {'h1': 'hv1'})
                          )
 
     def test_060_request_matches_forward(self):
@@ -87,7 +87,7 @@ class ResponseManagerTest(unittest.TestCase):
                              req['method'],
                              '%s://%s/%s' % (exp['forward']['scheme'], exp['forward']['host'], req['path']),
                              req['body'],
-                             '[]')
+                             '{}')
                          )
 
     def test_060_priority_sort_test(self):
@@ -124,7 +124,7 @@ class ResponseManagerTest(unittest.TestCase):
                                   req['method'],
                                   '%s://%s/%s' % (exp['forward']['scheme'], exp['forward']['host'], req['path']),
                                   '',
-                                  '[]')
+                                  '{}')
                               )
 
     def test_090_empty_expectation_response_default_values(self):
@@ -158,7 +158,7 @@ class ResponseManagerTest(unittest.TestCase):
                              req['method'],
                              '%s://%s/%s' % (real_scheme, real_host, req['path']),
                              req['body'],
-                             [('h1', 'hv1')])
+                             {'h1': 'hv1'})
                          )
 
 
