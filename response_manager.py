@@ -143,11 +143,13 @@ class ResponseManager:
 
         for attr in list_of_attributes_to_compare:
             if attr in request_exp:
-                result = cls.value_matcher(request_exp[attr], request_act[attr])
+                result = (attr in request_act) and cls.value_matcher(request_exp[attr], request_act[attr])
                 if result is False:
                     cls.logger.debug(
                         'Difference in {attribute}. expected: {expected_value}, actual: {actual_value}'.format(
-                            attribute=attr, expected_value=request_exp[attr], actual_value=request_act[attr])
+                            attribute=attr,
+                            expected_value=request_exp[attr],
+                            actual_value=request_act[attr] if attr in request_act else 'None')
                     )
                     return False
 

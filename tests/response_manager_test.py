@@ -129,6 +129,16 @@ class ResponseManagerTest(unittest.TestCase):
             self.assertEquals(200, resp.status_code)
             self.assertEquals('', resp.text)
 
+    def test_100_request_matcher_empty_request_body(self):
+        req = {'method': 'GET', 'path': 'http://hostname.com/subp1'}
+        exp_request = {'method': 'GET'}
+        self.assertTrue(ResponseManager.is_expectation_match_request(exp_request, req))
+        exp_request = {'path': 'hostname'}
+        self.assertTrue(ResponseManager.is_expectation_match_request(exp_request, req))
+        exp_request = {'body': 'content'}
+        self.assertFalse(ResponseManager.is_expectation_match_request(exp_request, req))
+
+
 if __name__ == '__main__':
     unittest.main()
 
