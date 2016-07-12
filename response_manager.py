@@ -101,7 +101,7 @@ class ResponseManager:
         :param request: Any request into mock
         :return: custom response with result
         """
-        cls.logger.info("Request:\r\n%s" % request)
+        cls.logger.info("Request: %s" % request)
         list_matched_expectations = cls.get_matched_expectations_for_request(request)
 
         if len(list_matched_expectations) > 0:
@@ -111,7 +111,7 @@ class ResponseManager:
         else:
             cls.logger.warning("List of expectations is empty!")
             response = CustomResponse("No expectation for request:\r\n" + str(request))
-        logging.info("Response:\r\n%s" % response)
+        logging.info("Response: %s" % response)
         return response
 
     @classmethod

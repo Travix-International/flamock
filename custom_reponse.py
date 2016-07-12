@@ -18,7 +18,7 @@ class CustomResponse(object):
         self._text = text
 
     def __str__(self):
-        return "Response:\r\nstatus_code: %s\r\ntext: %s" % (self._status_code, self._text)
+        return "status_code: %s, text: %s" % (self._status_code, self._text)
 
     def to_flask_response(self):
         from flask import Response as FlaskResponse
