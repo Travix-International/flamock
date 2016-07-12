@@ -165,14 +165,23 @@ class ResponseManager:
         :param request: actual request is been forwarded
         :return: response from 3rd party as CustomResponse
         """
+        headers_to_ignore = ['Host']
         request_method = request['method'] if 'method' in request else 'GET'
         request_path = request['path'] if 'path' in request else '/'
         request_body = request['body'] if 'body' in request else ''
+        request_headers = request['headers'] if 'headers' in request else []
 
         url_for_request = "%s://%s/%s" % (expectation_forward['scheme'], expectation_forward['host'], request_path)
-        logging.debug("make request: %s %s body: %s" % (request_method, url_for_request, request_body))
+
+        forward_headers = []
+        for key, value in request_headers:
+            if key not in headers_to_ignore:
+                forward_headers += [(key, value)]
+
+        logging.info("Make forward request: %s %s body: %s headers: %s" % (
+            request_method, url_for_request, request_body, forward_headers))
         try:
-            resp = requests.request(method=request_method, url=url_for_request, data=request_body)
+            resp = requests.request(method=request_method, url=url_for_request, data=request_body, headers=forward_headers)
             cust_resp = CustomResponse(resp.text, resp.status_code)
         except Exception as e:
             logging.exception(e)
