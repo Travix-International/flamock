@@ -186,7 +186,7 @@ class ResponseManager:
                 url=url_for_request,
                 data=request_body,
                 headers=forward_headers)
-            cust_resp = CustomResponse(resp.text, resp.status_code)
+            cust_resp = CustomResponse(resp.text, resp.status_code, resp.headers)
         except Exception as e:
             logging.exception(e)
             cust_resp = CustomResponse(str(e), codes.not_found)

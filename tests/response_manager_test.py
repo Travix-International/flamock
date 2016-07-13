@@ -12,8 +12,8 @@ request_mock_response_code = 302
 request_mock_response_template = "method: %s, url: %s, body: %s, headers: %s"
 
 
-def request_mock(method='', url='', data='', headers=[]):
-    return CustomResponse(request_mock_response_template % (method, url, data, headers), request_mock_response_code)
+def request_mock(method='', url='', data='', headers={}):
+    return CustomResponse(request_mock_response_template % (method, url, data, headers), request_mock_response_code, headers)
 
 requests.request = request_mock
 
@@ -160,6 +160,24 @@ class ResponseManagerTest(unittest.TestCase):
                              req['body'],
                              {'h1': 'hv1'})
                          )
+
+    def test_120_make_request_check_headers(self):
+        req = {'method': 'POST', 'path': 'subp1/subp2.aspx', 'body': 'bodycontent', 'headers': [('h1', 'hv1'), ('Host', 'travix.com')]}
+        real_host = 'real_hostname.com'
+        real_scheme = 'https'
+
+        exp_forward = {'scheme': real_scheme, 'host': real_host}
+        resp = ResponseManager.make_request(exp_forward, req)
+        self.assertEqual(resp.status_code, request_mock_response_code)
+        self.assertEqual(resp.text,
+                         request_mock_response_template
+                         % (
+                             req['method'],
+                             '%s://%s/%s' % (real_scheme, real_host, req['path']),
+                             req['body'],
+                             {'h1': 'hv1'})
+                         )
+        self.assertEqual(resp.headers, {'h1': 'hv1'})
 
 
 
