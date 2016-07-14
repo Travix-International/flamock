@@ -29,5 +29,7 @@ class CustomResponse(object):
 
     def to_flask_response(self):
         from flask import make_response
-        logging.getLogger().info("status_code: %s, text: %s, headers: %s" % (self._status_code, self._text, self._headers))
-        return make_response((self._text, self._status_code, self._headers))
+        resp = make_response((self._text, self._status_code))
+        for key, value in self._headers:
+            resp.headers[key] = value
+        return resp
