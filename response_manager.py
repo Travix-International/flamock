@@ -69,7 +69,7 @@ class ResponseManager:
 
             if cls.is_expectation_match_request(expectation['request'], request):
                 list_matched_expectations.append(expectation)
-        logging.debug("Count of matched expectations: %s" % len(list_matched_expectations))
+        cls.logger.debug("Count of matched expectations: %s" % len(list_matched_expectations))
         return list_matched_expectations
 
     @classmethod
@@ -111,7 +111,7 @@ class ResponseManager:
         else:
             cls.logger.warning("List of expectations is empty!")
             response = CustomResponse("No expectation for request:\r\n" + str(request))
-        logging.info("Response: %s" % response)
+        cls.logger.info("Response: %s" % response)
         return response
 
     @classmethod
@@ -178,7 +178,7 @@ class ResponseManager:
             if key not in headers_to_ignore:
                 forward_headers[key] = value
 
-        logging.info("Make forward request: %s %s body: %s headers: %s" % (
+        cls.logger.info("Make forward request: %s %s body: %s headers: %s" % (
             request_method, url_for_request, request_body, forward_headers))
         try:
             resp = requests.request(
@@ -188,7 +188,7 @@ class ResponseManager:
                 headers=forward_headers)
             cust_resp = CustomResponse(resp.text, resp.status_code, resp.headers)
         except Exception as e:
-            logging.exception(e)
+            cls.logger.exception(e)
             cust_resp = CustomResponse(str(e), codes.not_found)
         return cust_resp
 
