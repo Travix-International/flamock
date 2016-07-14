@@ -1,3 +1,4 @@
+import logging
 from requests.status_codes import codes
 
 
@@ -28,4 +29,5 @@ class CustomResponse(object):
 
     def to_flask_response(self):
         from flask import make_response
-        return make_response((self._text,self._status_code, self._headers))
+        logging.getLogger().info("status_code: %s, text: %s, headers: %s" % (self._status_code, self._text, self._headers))
+        return make_response((self._text, self._status_code, self._headers))

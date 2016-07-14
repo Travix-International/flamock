@@ -180,7 +180,6 @@ class ResponseManagerTest(unittest.TestCase):
         self.assertEqual(resp.headers, {'h1': 'hv1'})
 
 
-
 if __name__ == '__main__':
     unittest.main()
 
