@@ -38,8 +38,8 @@ class FlamockTest(unittest.TestCase):
         resp_text = resp.data.decode()
         self.assertIn('No expectation for request', resp_text)
         self.assertIn("'path': '%s'" % path, resp_text)
-        self.assertIn("'Header1', 'header1_value'", resp_text)
-        self.assertIn("'Header2', 'header2_value'", resp_text)
+        self.assertIn("'Header1': 'header1_value'", resp_text)
+        self.assertIn("'Header2': 'header2_value'", resp_text)
         self.assertIn("'cookie1': 'cookie1_value'", resp_text)
         self.assertIn("'cookie2': 'cookie2_value'", resp_text)
 

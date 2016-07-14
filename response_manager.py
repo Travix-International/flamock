@@ -169,12 +169,12 @@ class ResponseManager:
         request_method = request['method'] if 'method' in request else 'GET'
         request_path = request['path'] if 'path' in request else '/'
         request_body = request['body'] if 'body' in request else ''
-        request_headers = request['headers'] if 'headers' in request else []
+        request_headers = request['headers'] if 'headers' in request else {}
 
         url_for_request = "%s://%s/%s" % (expectation_forward['scheme'], expectation_forward['host'], request_path)
 
         forward_headers = {}
-        for key, value in request_headers:
+        for key, value in request_headers.items():
             if key not in headers_to_ignore:
                 forward_headers[key] = value
 
@@ -186,7 +186,13 @@ class ResponseManager:
                 url=url_for_request,
                 data=request_body,
                 headers=forward_headers)
-            cust_resp = CustomResponse(resp.text, resp.status_code, resp.headers)
+
+            response_headers = {}
+            for key, value in resp.headers.items():
+                if key not in headers_to_ignore:
+                    response_headers[key] = value
+
+            cust_resp = CustomResponse(resp.text, resp.status_code, response_headers)
         except Exception as e:
             cls.logger.exception(e)
             cust_resp = CustomResponse(str(e), codes.not_found)
@@ -198,4 +204,11 @@ class ResponseManager:
             expected_response = expectation['response']
             return CustomResponse(expected_response['body'], expected_response['httpcode'])
         return None
+
+    @classmethod
+    def headers_list_to_dict(cls, headers_list):
+        headers_dict = {}
+        for key, value in headers_list:
+            headers_dict[key] = value
+        return headers_dict
 

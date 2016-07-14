@@ -10,10 +10,13 @@ logging.basicConfig(level=logging.DEBUG, format=logging_format)
 
 request_mock_response_code = 302
 request_mock_response_template = "method: %s, url: %s, body: %s, headers: %s"
+request_mock_response_headers = {'mock_header': 'mock_header_value', 'Content-Encoding': 'gzip'}
 
 
 def request_mock(method='', url='', data='', headers={}):
-    return CustomResponse(request_mock_response_template % (method, url, data, headers), request_mock_response_code, headers)
+    mock_headers = headers.copy()
+    mock_headers.update(request_mock_response_headers)
+    return CustomResponse(request_mock_response_template % (method, url, data, headers), request_mock_response_code, mock_headers)
 
 requests.request = request_mock
 
@@ -26,8 +29,8 @@ class ResponseManagerTest(unittest.TestCase):
     def test_010_no_expectation(self):
         req = {'path': 'pathv', 'headers': [('h1', 'hv1')], 'body': 'bodyv', 'cookies': {'c1': 'cv1'}}
         resp = ResponseManager.generate_response(req)
+
         self.assertEquals(200, resp.status_code)
-        # self.assertIn('No expectation for request:'.encode(), resp.data)
         self.assertIn('No expectation for request:', resp.text)
         self.assertIn('pathv', resp.text)
         self.assertIn("[('h1', 'hv1')]", resp.text)
@@ -57,21 +60,27 @@ class ResponseManagerTest(unittest.TestCase):
         self.assertTrue(ResponseManager.is_expectation_match_request(exp_request, req))
 
     def test_050_make_request(self):
-        req = {'method': 'POST', 'path': 'subp1/subp2.aspx', 'body': 'bodycontent', 'headers': [('h1', 'hv1')]}
+        req = {'method': 'POST', 'path': 'subp1/subp2.aspx', 'body': 'bodycontent', 'headers': {'h1': 'hv1'}}
         real_host = 'real_hostname.com'
         real_scheme = 'https'
 
         exp_forward = {'scheme': real_scheme, 'host': real_host}
         resp = ResponseManager.make_request(exp_forward, req)
-        self.assertEqual(resp.status_code, request_mock_response_code)
-        self.assertEqual(resp.text,
-                         request_mock_response_template
+        self.assertEqual(request_mock_response_code, resp.status_code)
+
+        self.assertEqual(request_mock_response_template
                          % (
                              req['method'],
                              '%s://%s/%s' % (real_scheme, real_host, req['path']),
                              req['body'],
-                             {'h1': 'hv1'})
-                         )
+                             req['headers'])
+                         ,
+                         resp.text)
+
+        expected_headers = request_mock_response_headers.copy()
+        expected_headers.update(req['headers'])
+        del(expected_headers['Content-Encoding'])
+        self.assertEqual(resp.headers, expected_headers)
 
     def test_060_request_matches_forward(self):
         req = {'method': 'GET', 'path': 'subp1/subp2.aspx', 'body': 'bodycontent'}
@@ -145,7 +154,12 @@ class ResponseManagerTest(unittest.TestCase):
         self.assertFalse(ResponseManager.is_expectation_match_request(exp_request, req))
 
     def test_110_make_request_ignore_host_in_header(self):
-        req = {'method': 'POST', 'path': 'subp1/subp2.aspx', 'body': 'bodycontent', 'headers': [('h1', 'hv1'), ('Host', 'travix.com')]}
+        req = {
+            'method': 'POST',
+            'path': 'subp1/subp2.aspx',
+            'body': 'bodycontent',
+            'headers': {'h1': 'hv1', 'Host': 'travix.com'}
+        }
         real_host = 'real_hostname.com'
         real_scheme = 'https'
 
@@ -162,7 +176,11 @@ class ResponseManagerTest(unittest.TestCase):
                          )
 
     def test_120_make_request_check_headers(self):
-        req = {'method': 'POST', 'path': 'subp1/subp2.aspx', 'body': 'bodycontent', 'headers': [('h1', 'hv1'), ('Host', 'travix.com')]}
+        req = {'method': 'POST',
+               'path': 'subp1/subp2.aspx',
+               'body': 'bodycontent',
+               'headers': {'h1': 'hv1', 'Host': 'travix.com'}
+               }
         real_host = 'real_hostname.com'
         real_scheme = 'https'
 
@@ -177,13 +195,18 @@ class ResponseManagerTest(unittest.TestCase):
                              req['body'],
                              {'h1': 'hv1'})
                          )
-        self.assertEqual(resp.headers, {'h1': 'hv1'})
+        expected_headers = request_mock_response_headers.copy()
+        expected_headers.update(req['headers'])
+        del(expected_headers['Host'])
+        del(expected_headers['Content-Encoding'])
+
+        self.assertEqual(resp.headers, expected_headers)
 
     def test_130_make_request_ignore_content_encoding_in_header(self):
         req = {'method': 'POST',
                'path': 'subp1/subp2.aspx',
                'body': 'bodycontent',
-               'headers': [('h1', 'hv1'), ('Content-Encoding', 'gzip')]
+               'headers': {'h1': 'hv1', 'Content-Encoding': 'gzip'}
                }
         real_host = 'real_hostname.com'
         real_scheme = 'https'
@@ -200,6 +223,10 @@ class ResponseManagerTest(unittest.TestCase):
                              {'h1': 'hv1'})
                          )
 
+    def test_140_headers_list_to_dict(self):
+
+        headers_dict = ResponseManager.headers_list_to_dict([('h1', 'hv1'), ('h2', 'hv2')])
+        self.assertEqual(headers_dict, {'h1': 'hv1', 'h2': 'hv2'})
 
 if __name__ == '__main__':
     unittest.main()

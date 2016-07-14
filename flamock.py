@@ -50,7 +50,7 @@ def admin_status():
 def mock_process(request_path):
     req = {'method': request.method,
            'path': request_path,
-           'headers': request.headers.to_list(),
+           'headers': ResponseManager.headers_list_to_dict(request.headers),
            'body': request.data.decode(),
            'cookies': request.cookies}
     return ResponseManager.generate_response(req).to_flask_response()
