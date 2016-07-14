@@ -30,6 +30,6 @@ class CustomResponse(object):
     def to_flask_response(self):
         from flask import make_response
         resp = make_response((self._text, self._status_code))
-        for key, value in self._headers:
+        for key, value in self._headers.items():
             resp.headers[key] = value
         return resp
