@@ -165,7 +165,7 @@ class ResponseManager:
         :param request: actual request is been forwarded
         :return: response from 3rd party as CustomResponse
         """
-        headers_to_ignore = ['Host']
+        headers_to_ignore = ['Host', 'Content-Encoding']
         request_method = request['method'] if 'method' in request else 'GET'
         request_path = request['path'] if 'path' in request else '/'
         request_body = request['body'] if 'body' in request else ''

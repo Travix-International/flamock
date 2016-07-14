@@ -179,6 +179,27 @@ class ResponseManagerTest(unittest.TestCase):
                          )
         self.assertEqual(resp.headers, {'h1': 'hv1'})
 
+    def test_130_make_request_ignore_content_encoding_in_header(self):
+        req = {'method': 'POST',
+               'path': 'subp1/subp2.aspx',
+               'body': 'bodycontent',
+               'headers': [('h1', 'hv1'), ('Content-Encoding', 'gzip')]
+               }
+        real_host = 'real_hostname.com'
+        real_scheme = 'https'
+
+        exp_forward = {'scheme': real_scheme, 'host': real_host}
+        resp = ResponseManager.make_request(exp_forward, req)
+        self.assertEqual(resp.status_code, request_mock_response_code)
+        self.assertEqual(resp.text,
+                         request_mock_response_template
+                         % (
+                             req['method'],
+                             '%s://%s/%s' % (real_scheme, real_host, req['path']),
+                             req['body'],
+                             {'h1': 'hv1'})
+                         )
+
 
 if __name__ == '__main__':
     unittest.main()
