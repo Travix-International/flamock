@@ -44,7 +44,7 @@ class FlamockTest(unittest.TestCase):
         self.assertIn("'cookie2': 'cookie2_value'", resp_text)
 
     def test_030_configure_transparent_mock(self):
-        fwd_host = 'real_hostname.com'
+        fwd_host = 'google.com'
         fwd_scheme = 'https'
 
         exp_resp = {
@@ -86,7 +86,7 @@ class FlamockTest(unittest.TestCase):
         resp = self.app.get(self.host + '/folder/service.aspx',
                             data='<session_id>456</session_id>',
                             headers={'header1': 'header1_value', 'header2': 'header2_value'})
-        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.status_code, 400)
 
 if __name__ == '__main__':
     unittest.main()
