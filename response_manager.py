@@ -35,7 +35,7 @@ class ResponseManager:
 
     """
     re_flags = re.DOTALL
-    logger = logging.getLogger()
+    logger = logging.getLogger(__name__)
 
     @classmethod
     def sort_expectation_list_according_priority(cls, list_of_expectations):
@@ -110,7 +110,7 @@ class ResponseManager:
             response = cls.apply_action_from_expectation_to_request(expectation, request)
         else:
             cls.logger.warning("List of expectations is empty!")
-            response = CustomResponse("No expectation for request:\r\n" + str(request))
+            response = CustomResponse("No expectation for request: " + str(request))
         cls.logger.info("Response: %s" % response)
         return response
 

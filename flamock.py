@@ -1,3 +1,4 @@
+import sys
 import logging
 from flask import Flask
 from flask import request
@@ -14,12 +15,15 @@ app = Flask(__name__)
 
 @app.route('/%s/remove_all_expectations' % admin_path, methods=['POST'])
 def admin_remove_all_expectations():
+    app.logger.info("-")
     return ExpectationManager.remove_all().to_flask_response()
 
 
 @app.route('/%s/remove_expectation' % admin_path, methods=['POST'])
 def admin_remove_expectation():
-    req_data_dict, resp = ExpectationManager.json_to_dict(request.data.decode())
+    request_data = request.data.decode()
+    app.logger.info("Request data: %s" % request_data)
+    req_data_dict, resp = ExpectationManager.json_to_dict(request_data)
     if req_data_dict is None and resp.staus_code != 200:
         return resp.to_flask_response()
 
@@ -28,12 +32,15 @@ def admin_remove_expectation():
 
 @app.route('/%s/get_expectations' % admin_path, methods=['POST'])
 def admin_get_expectations():
+    app.logger.info("-")
     return ExpectationManager.get_expectations_as_response().to_flask_response()
 
 
 @app.route('/%s/add_expectation' % admin_path, methods=['POST'])
 def admin_add_expectation():
-    req_data_dict, resp = ExpectationManager.json_to_dict(request.data.decode())
+    request_data = request.data.decode()
+    app.logger.info("Request data: %s" % request_data)
+    req_data_dict, resp = ExpectationManager.json_to_dict(request_data)
     if req_data_dict is None and resp.status_code != 200:
         return resp.to_flask_response()
 
@@ -68,6 +75,11 @@ if __name__ == '__main__':
                                  help="Log level 0-50. DEBUG = 10 , INFO = 20, CRITICAL = 50")
 
     args = argument_parser.parse_args()
-    logging.basicConfig(level=args.loglevel, format=logging_format)
+
+    logging.basicConfig(format=logging_format)
+    if args.loglevel == logging.INFO:
+        # disable werkzeug logs for INFO level
+        logging.getLogger('werkzeug').setLevel(logging.WARNING)
+    logging.getLogger().setLevel(args.loglevel)
 
     app.run(debug=(args.loglevel == logging.DEBUG), host='0.0.0.0', port=1080)

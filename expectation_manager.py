@@ -12,7 +12,7 @@ class ExpectationManager:
     todo: fix return types
     """
     expectations = {}  # dict with <md5: json_object>
-    logger = logging.getLogger()
+    logger = logging.getLogger(__name__)
 
     @classmethod
     def remove_all(cls):
