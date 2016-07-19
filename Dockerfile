@@ -7,10 +7,10 @@
 #FROM ubuntu
 FROM travix/base-debian:latest
 
-MAINTAINER Igor Rybak "iryb@live.ru"
+MAINTAINER Travix
 RUN apt-get update -y
 RUN apt-get install -y python3-pip python3-dev git curl wget vim build-essential
-RUN git clone https://github.com/baor/flamock.git
+RUN git clone https://github.com/Travix-International/flamock.git
 
 WORKDIR /flamock
 RUN pip3 install -r requirements.txt
