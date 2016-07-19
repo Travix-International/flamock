@@ -74,7 +74,7 @@ class ExpectationManager:
         try:
             json_dict = json.loads(json_text)
         except Exception as e:
-            cls.logger.error("Error! Can't convert json to dict! Json %s" % json_text)
+            cls.logger.error("Can't convert json to dict! Json %s" % json_text)
             cls.logger.exception(e)
             return json_dict, CustomResponse("Error! Can't convert json to dict! Json %s\r\n"
                                              "Exception: %s" % (json_text, str(e)), codes.bad)
