@@ -4,7 +4,8 @@
 ############################################################
 
 # Set the base image to Ubuntu
-FROM ubuntu
+#FROM ubuntu
+FROM travix/base-debian:latest
 
 MAINTAINER Igor Rybak "iryb@live.ru"
 RUN apt-get update -y
