@@ -1,10 +1,10 @@
-import sys
 import logging
 from flask import Flask
 from flask import request
 from argparse import ArgumentParser
 from response_manager import ResponseManager
 from expectation_manager import ExpectationManager
+from custom_reponse import CustomResponse
 
 logging_format = '[%(asctime)s][%(funcName)s][%(lineno)d][%(levelname)s] %(message)s'
 admin_path = 'mock_admin'
@@ -22,7 +22,7 @@ def admin_remove_all_expectations():
 @app.route('/%s/remove_expectation' % admin_path, methods=['POST'])
 def admin_remove_expectation():
     request_data = request.data.decode()
-    app.logger.info("Request data: %s" % request_data.replace('\r', ' ').replace('\n', ' '))
+    app.logger.info("Request data: %s" % CustomResponse.remove_linebreaks(request_data))
     req_data_dict, resp = ExpectationManager.json_to_dict(request_data)
     if req_data_dict is None and resp.staus_code != 200:
         return resp.to_flask_response()
@@ -39,7 +39,7 @@ def admin_get_expectations():
 @app.route('/%s/add_expectation' % admin_path, methods=['POST'])
 def admin_add_expectation():
     request_data = request.data.decode()
-    app.logger.info("Request data: %s" % request_data.replace('\r', ' ').replace('\n', ' '))
+    app.logger.info("Request data: %s" % CustomResponse.remove_linebreaks(request_data))
     req_data_dict, resp = ExpectationManager.json_to_dict(request_data)
     if req_data_dict is None and resp.status_code != 200:
         return resp.to_flask_response()

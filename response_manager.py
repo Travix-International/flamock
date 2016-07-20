@@ -179,7 +179,7 @@ class ResponseManager:
                 forward_headers[key] = value
 
         cls.logger.info("Make forward request: %s %s body: %s headers: %s" % (
-            request_method, url_for_request, request_body, forward_headers))
+            request_method, url_for_request, CustomResponse.remove_linebreaks(request_body), forward_headers))
         try:
             resp = requests.request(
                 method=request_method,

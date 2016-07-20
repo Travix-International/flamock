@@ -88,5 +88,28 @@ class FlamockTest(unittest.TestCase):
                             headers={'header1': 'header1_value', 'header2': 'header2_value'})
         self.assertEqual(resp.status_code, 400)
 
+    def test_040_wide_expectation_with_empyt_path(self):
+        fwd_host = 'google.com'
+        fwd_scheme = 'https'
+
+        exp_fwd = {
+            'request': {
+                'path': '.*'
+            },
+            'forward': {
+                'scheme': fwd_scheme,
+                'host': fwd_host
+            },
+            'priority': 0
+        }
+
+        resp = self.app.post(self.host + '/' + flamock_admin_path + '/add_expectation',
+                             data=json.dumps(exp_fwd))
+        self.assertEqual(resp.status_code, 200)
+
+        resp = self.app.get(self.host + '/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('title="Google"', resp.data.decode())
+
 if __name__ == '__main__':
     unittest.main()
