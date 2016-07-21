@@ -185,7 +185,8 @@ class ResponseManager:
                 method=request_method,
                 url=url_for_request,
                 data=request_body,
-                headers=forward_headers)
+                headers=forward_headers,
+                timeout=120)
 
             response_headers = {}
             for key, value in resp.headers.items():
