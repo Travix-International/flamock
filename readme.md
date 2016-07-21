@@ -16,5 +16,22 @@ One expectation can describe following behavior:
 * Forward request
 * Send response to request
 
+# Examples
+Add a response with http code 503 for all requests with tag label 
+POST /mock_admin/add_expectation
+Body:
+{
+  "key": "503",
+  "request": {
+    "body": ".*<label>*"
+  },
+  "response": {
+    "httpcode": 503,
+    "body": "Answer from mock"
+  },
+  "unlimited": true,
+  "priority": 1
+}
+
 # License
 MIT © Travix International
