@@ -165,7 +165,7 @@ class ResponseManager:
         :param request: actual request is been forwarded
         :return: response from 3rd party as CustomResponse
         """
-        headers_to_ignore = ['Host', 'Content-Encoding']
+        headers_to_ignore = ['Host', 'Content-Encoding', 'Content-Length']
         request_method = request['method'] if 'method' in request else 'GET'
         request_path = request['path'] if 'path' in request else '/'
         request_body = request['body'] if 'body' in request else ''
@@ -186,7 +186,8 @@ class ResponseManager:
                 url=url_for_request,
                 data=request_body,
                 headers=forward_headers,
-                timeout=120)
+                timeout=60,
+                verify=False)
 
             response_headers = {}
             for key, value in resp.headers.items():

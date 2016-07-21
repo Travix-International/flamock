@@ -13,7 +13,7 @@ request_mock_response_template = "method: %s, url: %s, body: %s, headers: %s"
 request_mock_response_headers = {'mock_header': 'mock_header_value', 'Content-Encoding': 'gzip'}
 
 
-def request_mock(method='', url='', data='', headers={}):
+def request_mock(method='', url='', data='', headers={}, **kwargs):
     mock_headers = headers.copy()
     mock_headers.update(request_mock_response_headers)
     return CustomResponse(request_mock_response_template % (method, url, data, headers), request_mock_response_code, mock_headers)
@@ -166,20 +166,19 @@ class ResponseManagerTest(unittest.TestCase):
         exp_forward = {'scheme': real_scheme, 'host': real_host}
         resp = ResponseManager.make_request(exp_forward, req)
         self.assertEqual(resp.status_code, request_mock_response_code)
-        self.assertEqual(resp.text,
-                         request_mock_response_template
+        self.assertEqual(request_mock_response_template
                          % (
                              req['method'],
                              '%s://%s/%s' % (real_scheme, real_host, req['path']),
                              req['body'],
-                             {'h1': 'hv1'})
-                         )
+                             {'h1': 'hv1'}),
+                         resp.text)
 
     def test_120_make_request_check_headers(self):
         req = {'method': 'POST',
                'path': 'subp1/subp2.aspx',
                'body': 'bodycontent',
-               'headers': {'h1': 'hv1', 'Host': 'travix.com'}
+               'headers': {'h1': 'hv1', 'Content-Length': '100'}
                }
         real_host = 'real_hostname.com'
         real_scheme = 'https'
@@ -197,7 +196,7 @@ class ResponseManagerTest(unittest.TestCase):
                          )
         expected_headers = request_mock_response_headers.copy()
         expected_headers.update(req['headers'])
-        del(expected_headers['Host'])
+        del(expected_headers['Content-Length'])
         del(expected_headers['Content-Encoding'])
 
         self.assertEqual(resp.headers, expected_headers)
