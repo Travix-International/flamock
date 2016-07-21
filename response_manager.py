@@ -84,10 +84,11 @@ class ResponseManager:
             expected_response = expectation['response']
             response_body = expected_response['body'] if 'body' in expected_response else ""
             response_code = expected_response['httpcode'] if 'httpcode' in expected_response else 200
-            return CustomResponse(response_body, response_code)
+            response_headers = expected_response['headers'] if 'headers' in expected_response else {}
+            return CustomResponse(text=response_body, status_code=response_code, headers=response_headers)
 
         if 'forward' in expectation:
-            return cls.make_request(expectation['forward'], request)
+            return cls.make_forward_request(expectation['forward'], request)
         return None
 
     @classmethod
@@ -150,11 +151,9 @@ class ResponseManager:
     @classmethod
     def value_matcher(cls, expected_value, actual_value):
         """
-        compares two values: actual and expected. Try to decide expected value as regex pattern.
-        If unsuccssfull, try to find expected value as substring of actual
-        :param expected_value: regex pattern or string
-        :param actual_value: string
-        :return: true if actual value matches expected value or contains expected value as substring. Otherwise - false
+        compares two values: actual and expected. Depends on types (str or dict) uses particular matcher
+        :returns  True or False
+
         """
         if isinstance(expected_value, str) and isinstance(actual_value, str):
             return cls.value_matcher_str(expected_value, actual_value)
@@ -190,7 +189,7 @@ class ResponseManager:
         return True
 
     @classmethod
-    def make_request(cls, expectation_forward, request):
+    def make_forward_request(cls, expectation_forward, request):
         """
         Makes request to 3rd party
         :param expectation_forward: description of forwarding request

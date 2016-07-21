@@ -65,7 +65,7 @@ class ResponseManagerTest(unittest.TestCase):
         real_scheme = 'https'
 
         exp_forward = {'scheme': real_scheme, 'host': real_host}
-        resp = ResponseManager.make_request(exp_forward, req)
+        resp = ResponseManager.make_forward_request(exp_forward, req)
         self.assertEqual(request_mock_response_code, resp.status_code)
 
         self.assertEqual(request_mock_response_template
@@ -164,7 +164,7 @@ class ResponseManagerTest(unittest.TestCase):
         real_scheme = 'https'
 
         exp_forward = {'scheme': real_scheme, 'host': real_host}
-        resp = ResponseManager.make_request(exp_forward, req)
+        resp = ResponseManager.make_forward_request(exp_forward, req)
         self.assertEqual(resp.status_code, request_mock_response_code)
         self.assertEqual(request_mock_response_template
                          % (
@@ -184,7 +184,7 @@ class ResponseManagerTest(unittest.TestCase):
         real_scheme = 'https'
 
         exp_forward = {'scheme': real_scheme, 'host': real_host}
-        resp = ResponseManager.make_request(exp_forward, req)
+        resp = ResponseManager.make_forward_request(exp_forward, req)
         self.assertEqual(resp.status_code, request_mock_response_code)
         self.assertEqual(resp.text,
                          request_mock_response_template
@@ -211,7 +211,7 @@ class ResponseManagerTest(unittest.TestCase):
         real_scheme = 'https'
 
         exp_forward = {'scheme': real_scheme, 'host': real_host}
-        resp = ResponseManager.make_request(exp_forward, req)
+        resp = ResponseManager.make_forward_request(exp_forward, req)
         self.assertEqual(resp.status_code, request_mock_response_code)
         self.assertEqual(resp.text,
                          request_mock_response_template
@@ -234,6 +234,16 @@ class ResponseManagerTest(unittest.TestCase):
         self.assertTrue(ResponseManager.is_expectation_match_request(exp_request, req))
         exp_request = {'headers': {'h1': 'hv2'}}
         self.assertFalse(ResponseManager.is_expectation_match_request(exp_request, req))
+
+    def test_160_return_response_with_header(self):
+            req = {'path': 'pathv'}
+            exp = {'request': {'path': 'pathv'}, 'response': {'httpcode': 200, 'headers': {'h1': 'hv1'}}}
+            ExpectationManager.add(exp)
+            resp = ResponseManager.generate_response(req)
+            self.assertEquals(200, resp.status_code)
+            self.assertEquals('', resp.text)
+            self.assertEquals({'h1': 'hv1'}, resp.headers)
+
 
 if __name__ == '__main__':
     unittest.main()

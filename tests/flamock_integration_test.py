@@ -5,6 +5,8 @@ from flamock import logging_format
 from flamock import admin_path as flamock_admin_path
 from flamock import app as flamock_app
 
+from expectation_manager import ExpectationManager
+
 logging.basicConfig(level=logging.DEBUG, format=logging_format)
 
 
@@ -17,6 +19,7 @@ class FlamockTest(unittest.TestCase):
         self.app = flamock_app.test_client()
         self.app.set_cookie('localhost', 'cookie1', 'cookie1_value')
         self.app.set_cookie('localhost', 'cookie2', 'cookie2_value')
+        ExpectationManager.expectations.clear()
 
     def tearDown(self):
         self.app.delete_cookie('localhost', 'cookie1')
