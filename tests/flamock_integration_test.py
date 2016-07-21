@@ -111,5 +111,43 @@ class FlamockTest(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn('title="Google"', resp.data.decode())
 
+    def test_050_response_for_headers(self):
+
+        exp_mock_header = {
+            'request': {
+                'headers': {'Sid':'123'}
+            },
+            'response': {
+                'httpcode': 503,
+                'body': "Mock answer for header!"
+            },
+            'priority': 1
+        }
+        exp_mock_all = {
+            'request': {
+                'path': '.*'
+            },
+            'response': {
+                'httpcode': 200,
+                'body': "Mock answer without header!"
+            },
+            'priority': 0
+        }
+
+        resp = self.app.post(self.host + '/' + flamock_admin_path + '/add_expectation',
+                             data=json.dumps(exp_mock_header))
+        self.assertEqual(resp.status_code, 200)
+        resp = self.app.post(self.host + '/' + flamock_admin_path + '/add_expectation',
+                             data=json.dumps(exp_mock_all))
+        self.assertEqual(resp.status_code, 200)
+
+        resp = self.app.get(self.host + '/', headers={'sid': '123'})
+        self.assertEqual(resp.status_code, 503)
+        self.assertIn('Mock answer for header!', resp.data.decode())
+
+        resp = self.app.get(self.host + '/', headers={'sid': '345'})
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('Mock answer without header!', resp.data.decode())
+
 if __name__ == '__main__':
     unittest.main()
