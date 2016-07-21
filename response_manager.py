@@ -63,11 +63,7 @@ class ResponseManager:
             return list_matched_expectations
 
         for key, expectation in expectations.items():
-            if 'request' not in expectation:
-                cls.logger.debug("Not found 'request' in expectation. Skip expectation: %s" % expectation)
-                continue
-
-            if cls.is_expectation_match_request(expectation['request'], request):
+            if 'request' not in expectation or cls.is_expectation_match_request(expectation['request'], request):
                 list_matched_expectations.append(expectation)
         cls.logger.debug("Count of matched expectations: %s" % len(list_matched_expectations))
         return list_matched_expectations

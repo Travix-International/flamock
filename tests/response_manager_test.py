@@ -244,6 +244,14 @@ class ResponseManagerTest(unittest.TestCase):
             self.assertEquals('', resp.text)
             self.assertEquals({'h1': 'hv1'}, resp.headers)
 
+    def test_170_expectation_without_request(self):
+            req = {'path': 'pathv'}
+            exp = {'response': {'httpcode': 200}}
+            ExpectationManager.add(exp)
+            resp = ResponseManager.generate_response(req)
+            self.assertEquals(200, resp.status_code)
+            self.assertEquals('', resp.text)
+
 
 if __name__ == '__main__':
     unittest.main()
