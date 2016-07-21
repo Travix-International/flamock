@@ -227,6 +227,14 @@ class ResponseManagerTest(unittest.TestCase):
         headers_dict = ResponseManager.headers_list_to_dict([('h1', 'hv1'), ('h2', 'hv2')])
         self.assertEqual(headers_dict, {'h1': 'hv1', 'h2': 'hv2'})
 
+    def test_150_request_matcher_headers(self):
+        req = {'method': 'GET', 'path': '', 'headers': {'h1': 'hv1'}}
+        req = dict(req)
+        exp_request = {'headers': {'h1': 'hv1'}}
+        self.assertTrue(ResponseManager.is_expectation_match_request(exp_request, req))
+        exp_request = {'headers': {'h1': 'hv2'}}
+        self.assertFalse(ResponseManager.is_expectation_match_request(exp_request, req))
+
 if __name__ == '__main__':
     unittest.main()
 
