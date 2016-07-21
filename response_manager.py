@@ -165,7 +165,8 @@ class ResponseManager:
         :param request: actual request is been forwarded
         :return: response from 3rd party as CustomResponse
         """
-        headers_to_ignore = ['Host', 'Content-Encoding', 'Content-Length']
+        headers_in_request_to_ignore = ['Host', 'Content-Encoding', 'Content-Length']
+        headers_in_response_to_ignore = ['Content-Encoding', 'Content-Length', 'Transfer-Encoding', 'Strict-Transport-Security']
         request_method = request['method'] if 'method' in request else 'GET'
         request_path = request['path'] if 'path' in request else '/'
         request_body = request['body'] if 'body' in request else ''
@@ -175,7 +176,7 @@ class ResponseManager:
 
         forward_headers = {}
         for key, value in request_headers.items():
-            if key not in headers_to_ignore:
+            if key not in headers_in_request_to_ignore:
                 forward_headers[key] = value
 
         cls.logger.info("Make forward request: %s %s body: %s headers: %s" % (
@@ -191,7 +192,7 @@ class ResponseManager:
 
             response_headers = {}
             for key, value in resp.headers.items():
-                if key not in headers_to_ignore:
+                if key not in headers_in_response_to_ignore:
                     response_headers[key] = value
 
             cust_resp = CustomResponse(resp.text, resp.status_code, response_headers)
