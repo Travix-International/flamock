@@ -74,6 +74,20 @@ if __name__ == '__main__':
                                  required=False,
                                  help="Log level 0-50. DEBUG = 10 , INFO = 20, CRITICAL = 50")
 
+    argument_parser.add_argument("-ps", "--proxy_scheme",
+                                 type=str,
+                                 default="http",
+                                 action="store",
+                                 required=False,
+                                 help="Schema for proxy")
+
+    argument_parser.add_argument("-ph", "--proxy_host",
+                                 type=str,
+                                 default=None,
+                                 action="store",
+                                 required=False,
+                                 help="Host for proxy")
+
     args = argument_parser.parse_args()
 
     logging.basicConfig(format=logging_format)
@@ -81,5 +95,10 @@ if __name__ == '__main__':
         # disable werkzeug logs for INFO level
         logging.getLogger('werkzeug').setLevel(logging.WARNING)
     logging.getLogger().setLevel(args.loglevel)
+
+    if args.proxy_host is not None:
+        scheme = args.proxy_scheme
+        expectation = {'key': 'fwd', 'forward': {'scheme': scheme, 'host': args.proxy_host}, 'priority': 0}
+        ExpectationManager.add(expectation)
 
     app.run(debug=(args.loglevel == logging.DEBUG), host='0.0.0.0', port=1080)

@@ -24,15 +24,11 @@ RUN pip3 install -r requirements.txt
 EXPOSE 1080
 
 # Setup for pipeline
-# ENV MOCK_ADD_EXPECTATION_PATH mock_admin/add_expectation
-# ENV FWD_SCHEME https
-# ENV FWD_HOST www.google.nl
+# ENV PROXY_SCHEME https
+# ENV PROXY_HOST www.google.nl
 
-CMD if [ -n "$FWD_SCHEME" ] && [ -n "$FWD_HOST" ] && [ -n "$MOCK_ADD_EXPECTATION_PATH" ]; then \
-        curl \
-            -H "Content-Type: application/json" \
-            -X POST \
-            -d '{ "key": "fwd", "forward": { "scheme": "${FWD_SCHEME}", "host": "${FWD_HOST}" }, "unlimited": true, "priority": 0 }' \
-            http://0.0.0.0:1080/${MOCK_ADD_EXPECTATION_PATH}; \
-    fi; \
-    python3 -u flamock.py;
+CMD if [ -n "$PROXY_HOST" ] && [ -n "$PROXY_SCHEME" ]; then \
+        python3 -u flamock.py --proxy_scheme $PROXY_SCHEME --proxy_host $PROXY_HOST; \
+    else \
+        python3 -u flamock.py;\
+    fi;
