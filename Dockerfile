@@ -23,17 +23,16 @@ RUN pip3 install -r requirements.txt
 # Expose ports
 EXPOSE 1080
 
-CMD python3 -u flamock.py
-
 # Setup for pipeline
-#ENV MOCK_ADD_EXPECTATION_PATH mock_admin/add_expectation
-#ENV FWD_SCHEME https
-#ENV FWD_HOST google.com
+# ENV MOCK_ADD_EXPECTATION_PATH mock_admin/add_expectation
+# ENV FWD_SCHEME https
+# ENV FWD_HOST www.google.nl
 
-CMD if [-n "${FWD_SCHEME}"] && [-n "${FWD_HOST}"] && [-n "${MOCK_ADD_EXPECTATION_PATH}"]; then \
+CMD if [ -n "$FWD_SCHEME" ] && [ -n "$FWD_HOST" ] && [ -n "$MOCK_ADD_EXPECTATION_PATH" ]; then \
         curl \
             -H "Content-Type: application/json" \
             -X POST \
             -d '{ "key": "fwd", "forward": { "scheme": "${FWD_SCHEME}", "host": "${FWD_HOST}" }, "unlimited": true, "priority": 0 }' \
             http://0.0.0.0:1080/${MOCK_ADD_EXPECTATION_PATH}; \
     fi; \
+    python3 -u flamock.py;
