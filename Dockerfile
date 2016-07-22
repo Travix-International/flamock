@@ -30,5 +30,5 @@ EXPOSE 1080
 CMD if [ -n "$PROXY_HOST" ] && [ -n "$PROXY_SCHEME" ]; then \
         python3 -u flamock.py --proxy_scheme $PROXY_SCHEME --proxy_host $PROXY_HOST; \
     else \
-        python3 -u flamock.py;\
+        python3 -u flamock.py; \
     fi;
