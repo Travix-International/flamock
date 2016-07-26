@@ -101,4 +101,4 @@ if __name__ == '__main__':
         expectation = {'key': 'fwd', 'forward': {'scheme': scheme, 'host': args.proxy_host}, 'priority': 0}
         ExpectationManager.add(expectation)
 
-    app.run(debug=(args.loglevel == logging.DEBUG), host='0.0.0.0', port=1080)
+    app.run(debug=(args.loglevel == logging.DEBUG), host='0.0.0.0', port=1080, threaded=True)
