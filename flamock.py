@@ -55,8 +55,12 @@ def admin_status():
 @app.route('/', defaults={'request_path': ''}, methods=['GET', 'POST'])
 @app.route('/<path:request_path>', methods=['GET', 'POST'])
 def mock_process(request_path):
+    query_string = request.query_string.decode()
+    path = request.full_path[1:]  # copy full path without first slash
+    if len(query_string) == 0:
+        path = path[:len(path)-1]  # remove question char in the end if query is empty
     req = {'method': request.method,
-           'path': request_path,
+           'path': path,
            'headers': ResponseManager.headers_list_to_dict(request.headers),
            'body': request.data.decode(),
            'cookies': request.cookies}
