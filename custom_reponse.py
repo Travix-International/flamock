@@ -24,7 +24,7 @@ class CustomResponse(object):
         self._headers = headers
 
     def __str__(self):
-        return "status_code: %s, text: %s, headers: %s" % (self._status_code, self.remove_linebreaks(self._text), self._headers)
+        return "status_code: %s, text: %s, headers: %s" % (self._status_code, self.remove_linebreaks(str(self._text)), self._headers)
 
     def to_flask_response(self):
         from flask import make_response

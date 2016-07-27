@@ -222,7 +222,7 @@ class ResponseManager:
                 if key not in headers_in_response_to_ignore:
                     response_headers[key] = value
 
-            cust_resp = CustomResponse(resp.text, resp.status_code, response_headers)
+            cust_resp = CustomResponse(resp.content, resp.status_code, response_headers)
         except Exception as e:
             cls.logger.exception(e)
             cust_resp = CustomResponse(str(e), codes.not_found)

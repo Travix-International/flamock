@@ -16,7 +16,11 @@ request_mock_response_headers = {'mock_header': 'mock_header_value', 'Content-En
 def request_mock(method='', url='', data='', headers={}, **kwargs):
     mock_headers = headers.copy()
     mock_headers.update(request_mock_response_headers)
-    return CustomResponse(request_mock_response_template % (method, url, data, headers), request_mock_response_code, mock_headers)
+    rep_str = request_mock_response_template % (method, url, data, headers)
+    obj = CustomResponse(rep_str, request_mock_response_code, mock_headers)
+    obj.content = rep_str
+
+    return obj
 
 requests.request = request_mock
 
