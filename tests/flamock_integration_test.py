@@ -91,8 +91,8 @@ class FlamockTest(unittest.TestCase):
                             headers={'header1': 'header1_value', 'header2': 'header2_value'})
         self.assertEqual(resp.status_code, 400)
 
-    def test_040_wide_expectation_with_empyt_path(self):
-        fwd_host = 'google.com'
+    def test_040_wide_expectation_with_empty_path(self):
+        fwd_host = 'google.nl'
         fwd_scheme = 'https'
 
         exp_fwd = {
@@ -112,7 +112,7 @@ class FlamockTest(unittest.TestCase):
 
         resp = self.app.get(self.host + '/')
         self.assertEqual(resp.status_code, 200)
-        self.assertIn('title="Google"', resp.data.decode())
+        self.assertIn('>Google<', resp.data.decode())
 
     def test_050_response_for_headers(self):
 
@@ -152,7 +152,7 @@ class FlamockTest(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn('Mock answer without header!', resp.data.decode())
 
-    def test_050_wide_expectation_with_empyt_path(self):
+    def test_050_wide_expectation_with_empty_path(self):
         fwd_host = 'yandex.ru/search'
         fwd_scheme = 'https'
 
@@ -160,6 +160,29 @@ class FlamockTest(unittest.TestCase):
             'forward': {
                 'scheme': fwd_scheme,
                 'host': fwd_host
+            },
+            'priority': 0
+        }
+
+        resp = self.app.post(self.host + '/' + flamock_admin_path + '/add_expectation',
+                             data=json.dumps(exp_fwd))
+        self.assertEqual(resp.status_code, 200)
+
+        resp = self.app.get(self.host + '/?text=Hello')
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('text=Hello', resp.data.decode())
+
+    def test_060_header_when_forward(self):
+        fwd_host = 'yandex.ru/search'
+        fwd_scheme = 'https'
+
+        exp_fwd = {
+            'forward': {
+                'scheme': fwd_scheme,
+                'host': fwd_host,
+                'headers': {
+                    'Host': 'yandex.ru'
+                }
             },
             'priority': 0
         }

@@ -2,9 +2,9 @@ import re
 import logging
 import requests
 from requests.status_codes import codes
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from expectation_manager import ExpectationManager
 from custom_reponse import CustomResponse
-
 
 class ResponseManager:
     """
@@ -16,21 +16,19 @@ class ResponseManager:
      - - headers
      - - - - key
      - - - - value
-     - - cookies # later
-     - - - - key
-     - - - - value
 
      - forward
      - - scheme
      - - host
+     - - headers
+     - - - - key
+     - - - - value
 
      - response
      - - httpcode
      - - headers
      - - body
-     - delay
-     - remaining_times
-     - unlimited
+
      - priority # int. 0 - lowest priority
 
     """
@@ -206,16 +204,23 @@ class ResponseManager:
             if key not in headers_in_request_to_ignore:
                 forward_headers[key] = value
 
+        if 'headers' in expectation_forward:
+            for key, value in expectation_forward['headers'].items():
+                forward_headers[key] = value
+
         cls.logger.info("Make forward request: %s %s body: %s headers: %s" % (
             request_method, url_for_request, CustomResponse.remove_linebreaks(request_body), forward_headers))
+
+        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
         try:
             resp = requests.request(
                 method=request_method,
                 url=url_for_request,
                 data=request_body,
                 headers=forward_headers,
-                timeout=60,
-                verify=False)
+                verify=False,
+                timeout=60)
 
             response_headers = {}
             for key, value in resp.headers.items():
