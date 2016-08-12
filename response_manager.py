@@ -1,8 +1,8 @@
 import re
+import urllib3
 import logging
 import requests
 from requests.status_codes import codes
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from expectation_manager import ExpectationManager
 from custom_reponse import CustomResponse
 
@@ -211,7 +211,7 @@ class ResponseManager:
         cls.logger.info("Make forward request: %s %s body: %s headers: %s" % (
             request_method, url_for_request, CustomResponse.remove_linebreaks(request_body), forward_headers))
 
-        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
         try:
             resp = requests.request(
