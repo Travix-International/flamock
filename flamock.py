@@ -92,6 +92,13 @@ if __name__ == '__main__':
                                  required=False,
                                  help="Host for proxy")
 
+    argument_parser.add_argument("-phd", "--proxy_headers",
+                                 type=str,
+                                 default=None,
+                                 action="store",
+                                 required=False,
+                                 help="Headers to add when proxing in format header1=value1;header2=value2")
+
     args = argument_parser.parse_args()
 
     logging.basicConfig(format=logging_format)
@@ -102,7 +109,23 @@ if __name__ == '__main__':
 
     if args.proxy_host is not None:
         scheme = args.proxy_scheme
-        expectation = {'key': 'fwd', 'forward': {'scheme': scheme, 'host': args.proxy_host}, 'priority': 0}
+        expectation = {
+            'key': 'fwd',
+            'forward':
+                {
+                    'scheme': scheme,
+                    'host': args.proxy_host
+                },
+            'priority': 0
+        }
+
+        if args.proxy_headers is not None:
+            dict_headers = {}
+            for pair in args.proxy_headers.split(';'):
+                key, value = pair.split('=')
+                dict_headers[key] = value
+            expectation['forward']['headers'] = dict_headers
+
         ExpectationManager.add(expectation)
 
     app.run(debug=(args.loglevel == logging.DEBUG), host='0.0.0.0', port=1080, threaded=True)
