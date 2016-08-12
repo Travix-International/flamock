@@ -26,9 +26,16 @@ EXPOSE 1080
 # Setup for pipeline
 # ENV PROXY_SCHEME https
 # ENV PROXY_HOST www.google.nl
+# ENV PROXY_HEADERS header1=value1;header2=value2
 
-CMD if [ -n "$PROXY_HOST" ] && [ -n "$PROXY_SCHEME" ]; then \
-        python3 -u flamock.py --proxy_scheme $PROXY_SCHEME --proxy_host $PROXY_HOST; \
-    else \
-        python3 -u flamock.py; \
-    fi;
+CMD args=""; \
+    if [ -n "$PROXY_HOST" ] then \
+        args=$args" --proxy_host $PROXY_HOST"; \
+    fi; \
+    if [ -n "$PROXY_SCHEME" ] then \
+        args=$args" --proxy_scheme $PROXY_SCHEME"; \
+    fi; \
+    if [ -n "$PROXY_HEADERS" ] then \
+        args=$args" --proxy_headers $PROXY_HEADERS"; \
+    fi; \
+    python3 -u flamock.py $args; \
