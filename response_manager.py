@@ -34,6 +34,7 @@ class ResponseManager:
     """
     re_flags = re.DOTALL
     logger = logging.getLogger(__name__)
+    host_blacklist = ["\.pl\W{0,1}.*\Z", "appspot.com\W{0,1}.*\Z"]
 
     @classmethod
     def sort_expectation_list_according_priority(cls, list_of_expectations):
@@ -97,6 +98,15 @@ class ResponseManager:
         :return: custom response with result
         """
         cls.logger.info("Request: %s" % request)
+
+        request_headers = request['headers'] if 'headers' in request else []
+        request_host = request_headers['Host'] if len(request_headers) > 0 and 'Host' in request['headers'] else ""
+        for bl_host in cls.host_blacklist:
+            if cls.value_matcher_str(bl_host, request_host):
+                cls.logger.warning("Request's host '%s' in a black list!" % request_host)
+                response = CustomResponse(status_code=codes.not_allowed)
+                return response
+
         list_matched_expectations = cls.get_matched_expectations_for_request(request)
 
         if len(list_matched_expectations) > 0:

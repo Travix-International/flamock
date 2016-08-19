@@ -256,6 +256,13 @@ class ResponseManagerTest(unittest.TestCase):
             self.assertEquals(200, resp.status_code)
             self.assertEquals('', resp.text)
 
+    def test_180_blacklist_request(self):
+            hosts_to_check = ['xxnet-403.appspot.com', 'testp1.piwo.pila.pl', 'testp4.pospr.waw.pl']
+            for host in hosts_to_check:
+                req = {'method': 'GET', 'path': '', 'headers': {'Host': host}}
+                req = dict(req)
+                resp = ResponseManager.generate_response(req)
+                self.assertEquals(405, resp.status_code)
 
 if __name__ == '__main__':
     unittest.main()
