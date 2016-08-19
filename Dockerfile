@@ -21,7 +21,7 @@ WORKDIR /flamock
 RUN pip3 install -r requirements.txt
 
 # Expose ports
-EXPOSE 1080
+EXPOSE 1080 8801 8802 8805
 
 # Setup for pipeline
 #CMD PROXY_SCHEME="https"; \

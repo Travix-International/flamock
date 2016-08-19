@@ -106,6 +106,13 @@ if __name__ == '__main__':
                                  required=False,
                                  help="Whitelist of hosts. A list in format host1,host2...")
 
+    argument_parser.add_argument("-p", "--port",
+                                 type=int,
+                                 default=1080,
+                                 action="store",
+                                 required=False,
+                                 help="flamock port for incoming requests")
+
     args = argument_parser.parse_args()
 
     logging.basicConfig(format=logging_format)
@@ -138,4 +145,4 @@ if __name__ == '__main__':
         if args.whitelist is not None:
             ResponseManager.host_whitelist = args.whitelist.split(',')
 
-    app.run(debug=(args.loglevel == logging.DEBUG), host='0.0.0.0', port=1080, threaded=True)
+    app.run(debug=(args.loglevel == logging.DEBUG), host='0.0.0.0', port=args.port, threaded=True)

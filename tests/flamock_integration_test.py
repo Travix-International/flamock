@@ -13,7 +13,9 @@ logging.basicConfig(level=logging.DEBUG, format=logging_format)
 
 class FlamockTest(unittest.TestCase):
 
-    host = 'http://0.0.0.0:1080'
+    base_port = 1080
+    base_host = "0.0.0.0"
+    base_url = 'http://%s:%s' % (base_host, base_port)
 
     def setUp(self):
         flamock_app.config['TESTING'] = True
@@ -28,7 +30,7 @@ class FlamockTest(unittest.TestCase):
         self.app.delete_cookie('localhost', 'cookie2')
 
     def test_010_check_status(self):
-        resp = self.app.get(self.host + '/' + flamock_admin_path + '/status')
+        resp = self.app.get(self.base_url + '/' + flamock_admin_path + '/status')
 
         self.assertEqual(resp.status_code, 200)
         self.assertEquals('OK', resp.data.decode())
@@ -36,7 +38,7 @@ class FlamockTest(unittest.TestCase):
     def test_020_no_expectation_get_headers_and_cookies(self):
         path = 'a/b/c'
 
-        resp = self.app.get(self.host + '/' + path,
+        resp = self.app.get(self.base_url + '/' + path,
                             headers={'header1': 'header1_value', 'header2': 'header2_value'})
 
         self.assertEqual(resp.status_code, 200)
@@ -74,21 +76,21 @@ class FlamockTest(unittest.TestCase):
             'priority': 0
         }
 
-        resp = self.app.post(self.host + '/' + flamock_admin_path + '/add_expectation',
+        resp = self.app.post(self.base_url + '/' + flamock_admin_path + '/add_expectation',
                              data=json.dumps(exp_fwd))
         self.assertEqual(resp.status_code, 200)
 
-        resp = self.app.post(self.host + '/' + flamock_admin_path + '/add_expectation',
+        resp = self.app.post(self.base_url + '/' + flamock_admin_path + '/add_expectation',
                              data=json.dumps(exp_resp))
         self.assertEqual(resp.status_code, 200)
 
-        resp = self.app.get(self.host + '/folder/service.aspx',
+        resp = self.app.get(self.base_url + '/folder/service.aspx',
                             data='<session_id>1234</session_id>',
                             headers={'header1': 'header1_value', 'header2': 'header2_value'})
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data.decode(), 'Mock answer!')
 
-        resp = self.app.get(self.host + '/folder/service.aspx',
+        resp = self.app.get(self.base_url + '/folder/service.aspx',
                             data='<session_id>456</session_id>',
                             headers={'header1': 'header1_value', 'header2': 'header2_value'})
         self.assertEqual(resp.status_code, 400)
@@ -108,11 +110,11 @@ class FlamockTest(unittest.TestCase):
             'priority': 0
         }
 
-        resp = self.app.post(self.host + '/' + flamock_admin_path + '/add_expectation',
+        resp = self.app.post(self.base_url + '/' + flamock_admin_path + '/add_expectation',
                              data=json.dumps(exp_fwd))
         self.assertEqual(resp.status_code, 200)
 
-        resp = self.app.get(self.host + '/')
+        resp = self.app.get(self.base_url + '/')
         self.assertEqual(resp.status_code, 200)
         self.assertIn('>Google<', resp.data.decode())
 
@@ -139,18 +141,18 @@ class FlamockTest(unittest.TestCase):
             'priority': 0
         }
 
-        resp = self.app.post(self.host + '/' + flamock_admin_path + '/add_expectation',
+        resp = self.app.post(self.base_url + '/' + flamock_admin_path + '/add_expectation',
                              data=json.dumps(exp_mock_header))
         self.assertEqual(resp.status_code, 200)
-        resp = self.app.post(self.host + '/' + flamock_admin_path + '/add_expectation',
+        resp = self.app.post(self.base_url + '/' + flamock_admin_path + '/add_expectation',
                              data=json.dumps(exp_mock_all))
         self.assertEqual(resp.status_code, 200)
 
-        resp = self.app.get(self.host + '/', headers={'sid': '123'})
+        resp = self.app.get(self.base_url + '/', headers={'sid': '123'})
         self.assertEqual(resp.status_code, 503)
         self.assertIn('Mock answer for header!', resp.data.decode())
 
-        resp = self.app.get(self.host + '/', headers={'sid': '345'})
+        resp = self.app.get(self.base_url + '/', headers={'sid': '345'})
         self.assertEqual(resp.status_code, 200)
         self.assertIn('Mock answer without header!', resp.data.decode())
 
@@ -166,11 +168,11 @@ class FlamockTest(unittest.TestCase):
             'priority': 0
         }
 
-        resp = self.app.post(self.host + '/' + flamock_admin_path + '/add_expectation',
+        resp = self.app.post(self.base_url + '/' + flamock_admin_path + '/add_expectation',
                              data=json.dumps(exp_fwd))
         self.assertEqual(resp.status_code, 200)
 
-        resp = self.app.get(self.host + '/?text=Hello')
+        resp = self.app.get(self.base_url + '/?text=Hello')
         self.assertEqual(resp.status_code, 200)
         self.assertIn('text=Hello', resp.data.decode())
 
@@ -189,11 +191,11 @@ class FlamockTest(unittest.TestCase):
             'priority': 0
         }
 
-        resp = self.app.post(self.host + '/' + flamock_admin_path + '/add_expectation',
+        resp = self.app.post(self.base_url + '/' + flamock_admin_path + '/add_expectation',
                              data=json.dumps(exp_fwd))
         self.assertEqual(resp.status_code, 200)
 
-        resp = self.app.get(self.host + '/?text=Hello')
+        resp = self.app.get(self.base_url + '/?text=Hello')
         self.assertEqual(resp.status_code, 200)
         self.assertIn('text=Hello', resp.data.decode())
 
