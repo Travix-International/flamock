@@ -6,6 +6,7 @@ from flamock import admin_path as flamock_admin_path
 from flamock import app as flamock_app
 
 from expectation_manager import ExpectationManager
+from response_manager import ResponseManager
 
 logging.basicConfig(level=logging.DEBUG, format=logging_format)
 
@@ -20,6 +21,7 @@ class FlamockTest(unittest.TestCase):
         self.app.set_cookie('localhost', 'cookie1', 'cookie1_value')
         self.app.set_cookie('localhost', 'cookie2', 'cookie2_value')
         ExpectationManager.expectations.clear()
+        ResponseManager.host_whitelist = ["0.0.0.0"]
 
     def tearDown(self):
         self.app.delete_cookie('localhost', 'cookie1')

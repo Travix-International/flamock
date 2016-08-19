@@ -29,6 +29,7 @@ class ResponseManagerTest(unittest.TestCase):
 
     def setUp(self):
         ExpectationManager.remove_all()
+        ResponseManager.host_whitelist.clear()
 
     def test_010_no_expectation(self):
         req = {'path': 'pathv', 'headers': [('h1', 'hv1')], 'body': 'bodyv', 'cookies': {'c1': 'cv1'}}
@@ -256,13 +257,22 @@ class ResponseManagerTest(unittest.TestCase):
             self.assertEquals(200, resp.status_code)
             self.assertEquals('', resp.text)
 
-    def test_180_blacklist_request(self):
+    def test_180_whitelist_request(self):
+            ResponseManager.host_whitelist = ["travix.com"]
             hosts_to_check = ['xxnet-403.appspot.com', 'testp1.piwo.pila.pl', 'testp4.pospr.waw.pl']
             for host in hosts_to_check:
                 req = {'method': 'GET', 'path': '', 'headers': {'Host': host}}
                 req = dict(req)
                 resp = ResponseManager.generate_response(req)
                 self.assertEquals(405, resp.status_code)
+
+            hosts_to_check = ['blabla.travix.com']
+            for host in hosts_to_check:
+                req = {'method': 'GET', 'path': '', 'headers': {'Host': host}}
+                req = dict(req)
+                resp = ResponseManager.generate_response(req)
+                self.assertEquals(200, resp.status_code)
+
 
 if __name__ == '__main__':
     unittest.main()
