@@ -99,6 +99,13 @@ if __name__ == '__main__':
                                  required=False,
                                  help="Headers to add when proxing in format header1=value1;header2=value2")
 
+    argument_parser.add_argument("-bl", "--blacklist",
+                                 type=str,
+                                 default=None,
+                                 action="store",
+                                 required=False,
+                                 help="Blacklist of hosts. A list in format host1,host2...")
+
     args = argument_parser.parse_args()
 
     logging.basicConfig(format=logging_format)
@@ -127,5 +134,8 @@ if __name__ == '__main__':
             expectation['forward']['headers'] = dict_headers
 
         ExpectationManager.add(expectation)
+
+        if args.blacklist is not None:
+            ResponseManager.host_blacklist = args.blacklist.split(',')
 
     app.run(debug=(args.loglevel == logging.DEBUG), host='0.0.0.0', port=1080, threaded=True)
