@@ -24,4 +24,4 @@ RUN pip3 install -r requirements.txt
 EXPOSE 1080 8801 8802 8805
 
 # Setup for pipeline
-CMD ["/startup.sh"]
+CMD /bin/bash ./startup.sh;
