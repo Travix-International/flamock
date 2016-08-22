@@ -113,6 +113,13 @@ if __name__ == '__main__':
                                  required=False,
                                  help="flamock port for incoming requests")
 
+    argument_parser.add_argument("-e", "--expectations",
+                                 type=str,
+                                 default=None,
+                                 action="store",
+                                 required=False,
+                                 help="Expectations to be loaded to flamock at startup. JSON format")
+
     args = argument_parser.parse_args()
 
     logging.basicConfig(format=logging_format)
@@ -144,5 +151,12 @@ if __name__ == '__main__':
 
         if args.whitelist is not None:
             ResponseManager.host_whitelist = args.whitelist.split(',')
+
+    if args.expectations is not None:
+        expectations, response = ExpectationManager.json_to_dict(args.expectations)
+        if response.status_code != 200:
+            raise Exception(response.text)
+        for expectation in expectations:
+            ExpectationManager.add(expectation)
 
     app.run(debug=(args.loglevel == logging.DEBUG), host='0.0.0.0', port=args.port, threaded=True)
