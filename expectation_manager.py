@@ -3,6 +3,7 @@ import hashlib
 import logging
 from requests.status_codes import codes
 from custom_reponse import CustomResponse
+from json_logging import JsonLogging
 
 
 class ExpectationManager:
@@ -12,7 +13,7 @@ class ExpectationManager:
     todo: fix return types
     """
     expectations = {}  # dict with <md5: json_object>
-    logger = logging.getLogger(__name__)
+    logger = JsonLogging(logging.getLogger(__name__))
 
     @classmethod
     def remove_all(cls):

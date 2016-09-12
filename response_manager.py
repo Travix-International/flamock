@@ -5,6 +5,8 @@ import requests
 from requests.status_codes import codes
 from expectation_manager import ExpectationManager
 from custom_reponse import CustomResponse
+from json_logging import JsonLogging
+
 
 class ResponseManager:
     """
@@ -33,7 +35,7 @@ class ResponseManager:
 
     """
     re_flags = re.DOTALL
-    logger = logging.getLogger(__name__)
+    logger = JsonLogging(logging.getLogger(__name__))
     host_whitelist = []
 
     @classmethod
@@ -222,10 +224,12 @@ class ResponseManager:
             for key, value in expectation_forward['headers'].items():
                 forward_headers[key] = value
 
-        cls.logger.info("Make forward request: %s %s body: %s headers: %s" % (
+        cls.logger.info("Forward request: %s %s body: %s headers: %s" % (
             request_method, url_for_request, CustomResponse.remove_linebreaks(request_body), forward_headers))
 
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        if logging.getLogger().level == logging.INFO:
+            logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARNING)
 
         try:
             resp = requests.request(

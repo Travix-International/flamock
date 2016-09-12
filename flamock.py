@@ -5,24 +5,27 @@ from argparse import ArgumentParser
 from response_manager import ResponseManager
 from expectation_manager import ExpectationManager
 from custom_reponse import CustomResponse
+from json_logging import JsonLogging
 
-logging_format = '[%(asctime)s][%(funcName)s][%(lineno)d][%(levelname)s] %(message)s'
+logging_format = '%(message)s'
 admin_path = 'mock_admin'
 
 
 app = Flask(__name__)
+with app.app_context():
+    app.json_logger = JsonLogging(app.logger)
 
 
 @app.route('/%s/remove_all_expectations' % admin_path, methods=['POST'])
 def admin_remove_all_expectations():
-    app.logger.info("-")
+    app.json_logger.info("Remove all expectations")
     return ExpectationManager.remove_all().to_flask_response()
 
 
 @app.route('/%s/remove_expectation' % admin_path, methods=['POST'])
 def admin_remove_expectation():
     request_data = request.data.decode()
-    app.logger.info("Request data: %s" % CustomResponse.remove_linebreaks(request_data))
+    app.json_logger.info("Remove expectation: %s" % CustomResponse.remove_linebreaks(request_data))
     req_data_dict, resp = ExpectationManager.json_to_dict(request_data)
     if req_data_dict is None and resp.staus_code != 200:
         return resp.to_flask_response()
@@ -32,14 +35,14 @@ def admin_remove_expectation():
 
 @app.route('/%s/get_expectations' % admin_path, methods=['POST'])
 def admin_get_expectations():
-    app.logger.info("-")
+    app.json_logger.info("Get expectations")
     return ExpectationManager.get_expectations_as_response().to_flask_response()
 
 
 @app.route('/%s/add_expectation' % admin_path, methods=['POST'])
 def admin_add_expectation():
     request_data = request.data.decode()
-    app.logger.info("Request data: %s" % CustomResponse.remove_linebreaks(request_data))
+    app.json_logger.info("Add expectation: %s" % CustomResponse.remove_linebreaks(request_data))
     req_data_dict, resp = ExpectationManager.json_to_dict(request_data)
     if req_data_dict is None and resp.status_code != 200:
         return resp.to_flask_response()
