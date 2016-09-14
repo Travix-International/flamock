@@ -1,4 +1,5 @@
 import re
+import time
 import urllib3
 import logging
 import requests
@@ -31,6 +32,7 @@ class ResponseManager:
      - - headers
      - - body
 
+     - delay # int
      - priority # int. 0 - lowest priority
 
     """
@@ -77,6 +79,9 @@ class ResponseManager:
         :param request: incoming request
         :return: custom response with result of action
         """
+        if 'delay' in expectation:
+            time.sleep(int(expectation['delay']))
+
         if 'response' in expectation:
             expected_response = expectation['response']
             response_body = expected_response['body'] if 'body' in expected_response else ""
