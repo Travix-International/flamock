@@ -18,7 +18,7 @@ One expectation can describe following behavior:
 
 # Examples
 Add a response with http code 503 for all requests with tag label 
-POST /mock_admin/add_expectation
+POST /flamock/add_expectation
 Body:
 {
   "key": "503",

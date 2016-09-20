@@ -41,6 +41,7 @@ class ResponseManager:
     logger = JsonLogging(logging.getLogger(__name__))
     host_whitelist = []
     log_container = LogContainer()
+    logs_url = None
 
     @classmethod
     def sort_expectation_list_according_priority(cls, list_of_expectations):
@@ -107,7 +108,10 @@ class ResponseManager:
         :return: custom response with result
         """
         cls.log_container.add({'request': request})
-        cls.logger.info("Log id %s for request %s %s headers: %s" % (cls.log_container.get_latest_id(), request['method'], request['path'], request['headers']))
+        if cls.logs_url is None:
+            cls.logger.info("Log id %s for request %s %s headers: %s" % (cls.log_container.get_latest_id(), request['method'], request['path'], request['headers']))
+        else:
+            cls.logger.info("Log %s/%s for request %s %s headers: %s" % (cls.logs_url, cls.log_container.get_latest_id(), request['method'], request['path'], request['headers']))
 
         if len(cls.host_whitelist) > 0:
             request_headers = request['headers'] if 'headers' in request else []
@@ -284,7 +288,7 @@ class ResponseManager:
             try:
                 id = int(id)
             except ValueError:
-                logging.error("Id for log message is not integer!")
+                cls.logger.error("Id for log message is not integer!")
             if id in cls.log_container.container:
                 return CustomResponse(str(cls.log_container.container[id]))
         return CustomResponse(str(cls.log_container.container))

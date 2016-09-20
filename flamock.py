@@ -8,7 +8,7 @@ from custom_reponse import CustomResponse
 from json_logging import JsonLogging
 
 logging_format = '%(message)s'
-admin_path = 'mock_admin'
+admin_path = 'flamock'
 
 
 app = Flask(__name__)
@@ -167,5 +167,5 @@ if __name__ == '__main__':
             raise Exception(response.text)
         for expectation in expectations:
             ExpectationManager.add(expectation)
-
+    ResponseManager.logs_url = '/%s/logs' % admin_path
     app.run(debug=(args.loglevel == logging.DEBUG), host='0.0.0.0', port=args.port, threaded=True)
