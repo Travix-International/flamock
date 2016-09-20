@@ -33,7 +33,7 @@ class ResponseManagerTest(unittest.TestCase):
         ResponseManager.host_whitelist.clear()
 
     def test_010_no_expectation(self):
-        req = {'path': 'pathv', 'headers': [('h1', 'hv1')], 'body': 'bodyv', 'cookies': {'c1': 'cv1'}}
+        req = {'method': 'GET', 'path': 'pathv', 'headers': [('h1', 'hv1')], 'body': 'bodyv', 'cookies': {'c1': 'cv1'}}
         resp = ResponseManager.generate_response(req)
 
         self.assertEquals(200, resp.status_code)
@@ -44,7 +44,7 @@ class ResponseManagerTest(unittest.TestCase):
         self.assertIn("'c1': 'cv1'", resp.text)
 
     def test_020_expected_response(self):
-        req = {'path': 'pathv', 'headers': [('h1', 'hv1')], 'body': 'bodyv', 'cookies': {'c1': 'cv1'}}
+        req = {'method': 'GET', 'path': 'pathv', 'headers': [('h1', 'hv1')], 'body': 'bodyv', 'cookies': {'c1': 'cv1'}}
         exp = {'request': {'path': 'pathv'}, 'response': {'httpcode': 200, 'body': "Mock answer!"}}
         ExpectationManager.add(exp)
         resp = ResponseManager.generate_response(req)
@@ -89,7 +89,7 @@ class ResponseManagerTest(unittest.TestCase):
         self.assertEqual(resp.headers, expected_headers)
 
     def test_060_request_matches_forward(self):
-        req = {'method': 'GET', 'path': 'subp1/subp2.aspx', 'body': 'bodycontent'}
+        req = {'method': 'GET', 'path': 'subp1/subp2.aspx', 'body': 'bodycontent', 'headers': {}}
         exp = {'request': {'path': 'subp1/subp2.aspx'}, 'forward': {'scheme': 'https', 'host': 'real_hostname.com'}}
         resp = ExpectationManager.add(exp)
         self.assertEquals(resp.status_code, 200)
@@ -143,7 +143,7 @@ class ResponseManagerTest(unittest.TestCase):
                           )
 
     def test_090_empty_expectation_response_default_values(self):
-            req = {'path': 'pathv'}
+            req = {'method': 'GET', 'path': 'pathv', 'headers': ''}
             exp = {'request': {'path': 'pathv'}, 'response': {}}
             ExpectationManager.add(exp)
             resp = ResponseManager.generate_response(req)
@@ -242,7 +242,7 @@ class ResponseManagerTest(unittest.TestCase):
         self.assertFalse(ResponseManager.is_expectation_match_request(exp_request, req))
 
     def test_160_return_response_with_header(self):
-        req = {'path': 'pathv'}
+        req = {'method': 'GET', 'path': 'pathv', 'headers': ''}
         exp = {'request': {'path': 'pathv'}, 'response': {'httpcode': 200, 'headers': {'h1': 'hv1'}}}
         ExpectationManager.add(exp)
         resp = ResponseManager.generate_response(req)
@@ -251,7 +251,7 @@ class ResponseManagerTest(unittest.TestCase):
         self.assertEquals({'h1': 'hv1'}, resp.headers)
 
     def test_170_expectation_without_request(self):
-        req = {'path': 'pathv'}
+        req = {'method': 'GET', 'path': 'pathv', 'headers': ''}
         exp = {'response': {'httpcode': 200}}
         ExpectationManager.add(exp)
         resp = ResponseManager.generate_response(req)
@@ -276,7 +276,7 @@ class ResponseManagerTest(unittest.TestCase):
 
     def test_190_delay(self):
         delay = 3
-        req = {'path': 'pathv'}
+        req = {'method': 'GET', 'path': 'pathv', 'headers': ''}
         exp = {'response': {'httpcode': 200}, 'delay': delay}
         ExpectationManager.add(exp)
         start_time = time.time()

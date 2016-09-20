@@ -7,6 +7,7 @@ from requests.status_codes import codes
 from expectation_manager import ExpectationManager
 from custom_reponse import CustomResponse
 from json_logging import JsonLogging
+from log_container import LogContainer
 
 
 class ResponseManager:
@@ -39,6 +40,7 @@ class ResponseManager:
     re_flags = re.DOTALL
     logger = JsonLogging(logging.getLogger(__name__))
     host_whitelist = []
+    log_container = LogContainer()
 
     @classmethod
     def sort_expectation_list_according_priority(cls, list_of_expectations):
@@ -104,7 +106,8 @@ class ResponseManager:
         :param request: Any request into mock
         :return: custom response with result
         """
-        cls.logger.info("Request: %s" % request)
+        cls.log_container.add({'request': request})
+        cls.logger.info("Log id %s for request %s %s headers: %s" % (cls.log_container.get_latest_id(), request['method'], request['path'], request['headers']))
 
         if len(cls.host_whitelist) > 0:
             request_headers = request['headers'] if 'headers' in request else []
@@ -116,6 +119,7 @@ class ResponseManager:
             if not has_wl_match:
                 cls.logger.warning("Request's host '%s' not in a white list!" % request_host)
                 response = CustomResponse(status_code=codes.not_allowed)
+                cls.log_container.update_last_with_kv('response', response)
                 return response
 
         list_matched_expectations = cls.get_matched_expectations_for_request(request)
@@ -127,7 +131,8 @@ class ResponseManager:
         else:
             cls.logger.warning("List of expectations is empty!")
             response = CustomResponse("No expectation for request: " + str(request))
-        cls.logger.info("Response: %s" % response)
+        cls.log_container.update_last_with_kv('response', response.to_dict())
+        cls.logger.debug("Response: %s" % response)
         return response
 
     @classmethod
@@ -228,13 +233,16 @@ class ResponseManager:
         if 'headers' in expectation_forward:
             for key, value in expectation_forward['headers'].items():
                 forward_headers[key] = value
-
-        cls.logger.info("Forward request: %s %s body: %s headers: %s" % (
+        cls.log_container.update_last_with_kv('forward', {
+            "request_method": request_method,
+            "url": url_for_request,
+            "body": CustomResponse.remove_linebreaks(request_body),
+            "headers": forward_headers})
+        cls.logger.debug("Forward request: %s %s body: %s headers: %s" % (
             request_method, url_for_request, CustomResponse.remove_linebreaks(request_body), forward_headers))
 
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        if logging.getLogger().level == logging.INFO:
-            logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARNING)
+        logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.ERROR)
 
         try:
             resp = requests.request(
@@ -269,4 +277,15 @@ class ResponseManager:
         for key, value in headers_list:
             headers_dict[key] = value
         return headers_dict
+
+    @classmethod
+    def return_logged_messages(cls, id):
+        if len(id) > 0:
+            try:
+                id = int(id)
+            except ValueError:
+                logging.error("Id for log message is not integer!")
+            if id in cls.log_container.container:
+                return CustomResponse(str(cls.log_container.container[id]))
+        return CustomResponse(str(cls.log_container.container))
 

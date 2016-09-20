@@ -50,6 +50,12 @@ def admin_add_expectation():
     return ExpectationManager.add(req_data_dict).to_flask_response()
 
 
+@app.route('/%s/logs' % admin_path, defaults={'id': ''}, methods=['GET'])
+@app.route('/%s/logs/<path:id>' % admin_path, methods=['GET'])
+def admin_logs(id):
+    return ResponseManager.return_logged_messages(id).to_flask_response()
+
+
 @app.route('/%s/status' % admin_path, methods=['GET'])
 def admin_status():
     return ExpectationManager.status().to_flask_response()

@@ -24,6 +24,7 @@ class FlamockTest(unittest.TestCase):
         self.app.set_cookie('localhost', 'cookie2', 'cookie2_value')
         ExpectationManager.expectations.clear()
         ResponseManager.host_whitelist = ["0.0.0.0"]
+        ResponseManager.log_container.clean()
 
     def tearDown(self):
         self.app.delete_cookie('localhost', 'cookie1')
@@ -33,7 +34,7 @@ class FlamockTest(unittest.TestCase):
         resp = self.app.get(self.base_url + '/' + flamock_admin_path + '/status')
 
         self.assertEqual(resp.status_code, 200)
-        self.assertEquals('OK', resp.data.decode())
+        self.assertEquals('OK', resp.get_data(as_text=True))
 
     def test_020_no_expectation_get_headers_and_cookies(self):
         path = 'a/b/c'
@@ -42,7 +43,7 @@ class FlamockTest(unittest.TestCase):
                             headers={'header1': 'header1_value', 'header2': 'header2_value'})
 
         self.assertEqual(resp.status_code, 200)
-        resp_text = resp.data.decode()
+        resp_text = resp.get_data(as_text=True)
         self.assertIn('No expectation for request', resp_text)
         self.assertIn("'path': '%s'" % path, resp_text)
         self.assertIn("'Header1': 'header1_value'", resp_text)
@@ -88,7 +89,7 @@ class FlamockTest(unittest.TestCase):
                             data='<session_id>1234</session_id>',
                             headers={'header1': 'header1_value', 'header2': 'header2_value'})
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.data.decode(), 'Mock answer!')
+        self.assertEqual(resp.get_data(as_text=True), 'Mock answer!')
 
         resp = self.app.get(self.base_url + '/folder/service.aspx',
                             data='<session_id>456</session_id>',
@@ -116,7 +117,7 @@ class FlamockTest(unittest.TestCase):
 
         resp = self.app.get(self.base_url + '/')
         self.assertEqual(resp.status_code, 200)
-        self.assertIn('>Google<', resp.data.decode())
+        self.assertIn('>Google<', resp.get_data(as_text=True))
 
     def test_050_response_for_headers(self):
 
@@ -150,13 +151,13 @@ class FlamockTest(unittest.TestCase):
 
         resp = self.app.get(self.base_url + '/', headers={'sid': '123'})
         self.assertEqual(resp.status_code, 503)
-        self.assertIn('Mock answer for header!', resp.data.decode())
+        self.assertIn('Mock answer for header!', resp.get_data(as_text=True))
 
         resp = self.app.get(self.base_url + '/', headers={'sid': '345'})
         self.assertEqual(resp.status_code, 200)
-        self.assertIn('Mock answer without header!', resp.data.decode())
+        self.assertIn('Mock answer without header!', resp.get_data(as_text=True))
 
-    def test_050_wide_expectation_with_empty_path(self):
+    def test_055_wide_expectation_with_empty_path(self):
         fwd_host = 'yandex.ru/search'
         fwd_scheme = 'https'
 
@@ -174,7 +175,7 @@ class FlamockTest(unittest.TestCase):
 
         resp = self.app.get(self.base_url + '/?text=Hello')
         self.assertEqual(resp.status_code, 200)
-        self.assertIn('text=Hello', resp.data.decode())
+        self.assertIn('text=Hello', resp.get_data(as_text=True))
 
     def test_060_header_when_forward(self):
         fwd_host = 'yandex.ru/search'
@@ -197,7 +198,39 @@ class FlamockTest(unittest.TestCase):
 
         resp = self.app.get(self.base_url + '/?text=Hello')
         self.assertEqual(resp.status_code, 200)
-        self.assertIn('text=Hello', resp.data.decode())
+        self.assertIn('text=Hello', resp.get_data(as_text=True))
+
+    def test_070_get_empty_logs(self):
+        resp = self.app.get(self.base_url + '/' + flamock_admin_path + '/logs')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEquals('{}', resp.get_data(as_text=True))
+
+    def test_080_get_all_logs(self):
+        self.app.get(self.base_url + '/')
+
+        resp = self.app.get(self.base_url + '/' + flamock_admin_path + '/logs')
+
+        self.assertEqual(resp.status_code, 200)
+        resp_text = resp.get_data(as_text=True)
+
+        self.assertGreater(len(resp_text), 3)
+        self.assertIn('request', resp_text)
+        self.assertIn('response', resp_text)
+        self.assertIn('No expectation for request', resp_text)
+
+    def test_090_get_log_by_id(self):
+        self.app.get(self.base_url + '/')
+
+        resp = self.app.get(self.base_url + '/' + flamock_admin_path + '/logs/0')
+
+        self.assertEqual(resp.status_code, 200)
+        resp_text = resp.get_data(as_text=True)
+
+        self.assertGreater(len(resp_text), 3)
+        self.assertIn('request', resp_text)
+        self.assertIn('response', resp_text)
+        self.assertIn('No expectation for request', resp_text)
 
 if __name__ == '__main__':
     unittest.main()
