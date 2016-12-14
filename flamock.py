@@ -6,6 +6,7 @@ from response_manager import ResponseManager
 from expectation_manager import ExpectationManager
 from custom_reponse import CustomResponse
 from json_logging import JsonLogging
+from extensions import Extensions
 
 logging_format = '%(message)s'
 admin_path = 'flamock'
@@ -70,7 +71,7 @@ def mock_process(request_path):
         path = path[:len(path)-1]  # remove question char in the end if query is empty
     req = {'method': request.method,
            'path': path,
-           'headers': ResponseManager.headers_list_to_dict(request.headers),
+           'headers': Extensions.list_of_tuples_to_dict(request.headers),
            'body': request.data.decode(),
            'cookies': request.cookies}
     return ResponseManager.generate_response(req).to_flask_response()

@@ -51,20 +51,6 @@ class ResponseManagerTest(unittest.TestCase):
         self.assertEquals(200, resp.status_code)
         self.assertEquals('Mock answer!', resp.text)
 
-    def test_030_request_matcher_substring(self):
-        req = {'method': 'GET', 'path': 'http://hostname.com/subp1', 'body': 'bodycontent'}
-        exp_request = {'method': 'GET'}
-        self.assertTrue(ResponseManager.is_expectation_match_request(exp_request, req))
-        exp_request = {'path': 'hostname'}
-        self.assertTrue(ResponseManager.is_expectation_match_request(exp_request, req))
-        exp_request = {'body': 'content'}
-        self.assertTrue(ResponseManager.is_expectation_match_request(exp_request, req))
-
-    def test_040_request_matcher_regex(self):
-        req = {'method': 'GET', 'path': 'http://hostname.com/subp1', 'body': 'bodycontent'}
-        exp_request = {'body': 'b.dy.onte.t'}
-        self.assertTrue(ResponseManager.is_expectation_match_request(exp_request, req))
-
     def test_050_make_request(self):
         req = {'method': 'POST', 'path': 'subp1/subp2.aspx', 'body': 'bodycontent', 'headers': {'h1': 'hv1'}}
         real_host = 'real_hostname.com'
@@ -150,15 +136,6 @@ class ResponseManagerTest(unittest.TestCase):
             self.assertEquals(200, resp.status_code)
             self.assertEquals('', resp.text)
 
-    def test_100_request_matcher_empty_request_body(self):
-        req = {'method': 'GET', 'path': 'http://hostname.com/subp1'}
-        exp_request = {'method': 'GET'}
-        self.assertTrue(ResponseManager.is_expectation_match_request(exp_request, req))
-        exp_request = {'path': 'hostname'}
-        self.assertTrue(ResponseManager.is_expectation_match_request(exp_request, req))
-        exp_request = {'body': 'content'}
-        self.assertFalse(ResponseManager.is_expectation_match_request(exp_request, req))
-
     def test_110_make_request_ignore_host_in_header(self):
         req = {
             'method': 'POST',
@@ -228,18 +205,7 @@ class ResponseManagerTest(unittest.TestCase):
                              {'h1': 'hv1'})
                          )
 
-    def test_140_headers_list_to_dict(self):
 
-        headers_dict = ResponseManager.headers_list_to_dict([('h1', 'hv1'), ('h2', 'hv2')])
-        self.assertEqual(headers_dict, {'h1': 'hv1', 'h2': 'hv2'})
-
-    def test_150_request_matcher_headers(self):
-        req = {'method': 'GET', 'path': '', 'headers': {'h1': 'hv1'}}
-        req = dict(req)
-        exp_request = {'headers': {'h1': 'hv1'}}
-        self.assertTrue(ResponseManager.is_expectation_match_request(exp_request, req))
-        exp_request = {'headers': {'h1': 'hv2'}}
-        self.assertFalse(ResponseManager.is_expectation_match_request(exp_request, req))
 
     def test_160_return_response_with_header(self):
         req = {'method': 'GET', 'path': 'pathv', 'headers': ''}

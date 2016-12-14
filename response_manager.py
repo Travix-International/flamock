@@ -8,6 +8,7 @@ from expectation_manager import ExpectationManager
 from custom_reponse import CustomResponse
 from json_logging import JsonLogging
 from log_container import LogContainer
+from expectation_matcher import ExpectationMatcher
 
 
 class ResponseManager:
@@ -37,7 +38,7 @@ class ResponseManager:
      - priority # int. 0 - lowest priority
 
     """
-    re_flags = re.DOTALL
+
     logger = JsonLogging(logging.getLogger(__name__))
     host_whitelist = []
     log_container = LogContainer()
@@ -69,7 +70,7 @@ class ResponseManager:
             return list_matched_expectations
 
         for key, expectation in expectations.items():
-            if 'request' not in expectation or cls.is_expectation_match_request(expectation['request'], request):
+            if 'request' not in expectation or ExpectationMatcher.is_expectation_match_request(expectation['request'], request):
                 list_matched_expectations.append(expectation)
         cls.logger.debug("Count of matched expectations: %s" % len(list_matched_expectations))
         return list_matched_expectations
@@ -118,7 +119,7 @@ class ResponseManager:
             request_host = request_headers['Host'] if len(request_headers) > 0 and 'Host' in request['headers'] else ""
             has_wl_match = False
             for wl_host in cls.host_whitelist:
-                has_wl_match = has_wl_match or cls.value_matcher_str(wl_host, request_host)
+                has_wl_match = has_wl_match or ExpectationMatcher.value_matcher(wl_host, request_host)
 
             if not has_wl_match:
                 cls.logger.warning("Request's host '%s' not in a white list!" % request_host)
@@ -138,79 +139,6 @@ class ResponseManager:
         cls.log_container.update_last_with_kv('response', response.to_dict())
         cls.logger.debug("Response: %s" % response)
         return response
-
-    @classmethod
-    def value_matcher_str(cls, expected_value, actual_value):
-        """
-        compares two values: actual and expected. Try to decide expected value as regex pattern.
-        If unsuccssfull, try to find expected value as substring of actual
-        :param expected_value: regex pattern or string
-        :param actual_value: string
-        :return: true if actual value matches expected value or contains expected value as substring. Otherwise - false
-        """
-        try:
-            compiled_pattern = re.compile(expected_value, cls.re_flags)
-            search_result = compiled_pattern.search(actual_value)
-            return search_result is not None
-        except TypeError as e:
-            cls.logger.exception(e)
-            return expected_value in actual_value
-
-    @classmethod
-    def value_matcher_dict(cls, expected_dict, actual_dict):
-        """
-        compares two dictionaries
-        :param expected_dict: dict
-        :param actual_dict: dict
-        :return: true if actial dict contains all the headers from expected
-        """
-        for key, value in expected_dict.items():
-            if key not in actual_dict:
-                return False
-
-            if value != actual_dict[key]:
-                return False
-        return True
-
-    @classmethod
-    def value_matcher(cls, expected_value, actual_value):
-        """
-        compares two values: actual and expected. Depends on types (str or dict) uses particular matcher
-        :returns  True or False
-
-        """
-        if isinstance(expected_value, str) and isinstance(actual_value, str):
-            return cls.value_matcher_str(expected_value, actual_value)
-        elif isinstance(expected_value, dict) and isinstance(actual_value, dict):
-            return cls.value_matcher_dict(expected_value, actual_value)
-        else:
-            return False
-
-    @classmethod
-    def is_expectation_match_request(cls, request_exp, request_act):
-        """
-        Compares two requests field by field
-        :param request_exp: request from expectations
-        :param request_act: actual request
-        :return: True if all fields of actual request are match to particular expected request
-        """
-        list_of_attributes_to_compare = ['method', 'path', 'body', 'headers']
-
-        for attr in list_of_attributes_to_compare:
-            if attr in request_exp:
-                result = (attr in request_act) and cls.value_matcher(request_exp[attr], request_act[attr])
-                if result is False:
-                    cls.logger.debug(
-                        'Difference in {attribute}. expected: {expected_value}, actual: {actual_value}'.format(
-                            attribute=attr,
-                            expected_value=request_exp[attr],
-                            actual_value=request_act[attr] if attr in request_act else 'None')
-                    )
-                    return False
-
-        cls.logger.debug('Requests are match expected: {expected_value}, actual: {actual_value}'.format(
-                        expected_value=str(request_exp), actual_value=str(request_act)))
-        return True
 
     @classmethod
     def make_forward_request(cls, expectation_forward, request):
@@ -274,13 +202,6 @@ class ResponseManager:
             expected_response = expectation['response']
             return CustomResponse(expected_response['body'], expected_response['httpcode'])
         return None
-
-    @classmethod
-    def headers_list_to_dict(cls, headers_list):
-        headers_dict = {}
-        for key, value in headers_list:
-            headers_dict[key] = value
-        return headers_dict
 
     @classmethod
     def return_logged_messages(cls, id):
