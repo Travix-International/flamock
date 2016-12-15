@@ -1,7 +1,7 @@
 import json
 import logging
 import unittest
-from flamock import logging_format
+from logging_format import logging_format
 from flask_factory import FlaskFactory
 
 logging.basicConfig(level=logging.DEBUG, format=logging_format)

@@ -1,6 +1,6 @@
 import unittest
 import logging
-from flamock import logging_format
+from logging_format import logging_format
 from expectation_matcher import ExpectationMatcher
 
 logging.basicConfig(level=logging.DEBUG, format=logging_format)

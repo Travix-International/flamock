@@ -1,8 +1,7 @@
 import logging
 from argparse import ArgumentParser
 from flask_factory import FlaskFactory
-
-logging_format = '%(message)s'
+from logging_format import logging_format
 
 if __name__ == '__main__':
 

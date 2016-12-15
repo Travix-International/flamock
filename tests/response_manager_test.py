@@ -1,7 +1,7 @@
 import time
 import unittest
 import logging
-from flamock import logging_format
+from logging_format import logging_format
 from custom_reponse import CustomResponse
 from expectation_manager import ExpectationManager
 from response_manager import ResponseManager

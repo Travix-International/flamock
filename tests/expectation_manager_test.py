@@ -1,7 +1,7 @@
 import json
 import logging
 import unittest
-from flamock import logging_format
+from logging_format import logging_format
 
 from expectation_manager import ExpectationManager
 
