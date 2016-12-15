@@ -4,6 +4,7 @@ import logging
 from requests.status_codes import codes
 from custom_reponse import CustomResponse
 from json_logging import JsonLogging
+from expectation_matcher import ExpectationMatcher
 
 
 class ExpectationManager:
@@ -12,75 +13,92 @@ class ExpectationManager:
 
     todo: fix return types
     """
-    expectations = {}  # dict with <md5: json_object>
-    logger = JsonLogging(logging.getLogger(__name__))
+    _expectations = None  # dict with <md5: json_object>
+    _logger = None
+    expectations = None
 
-    @classmethod
-    def remove_all(cls):
+    def __init__(self, logger=None):
+        if logger is None:
+            self._logger = JsonLogging(logging.getLogger(__name__))
+        else:
+            self._logger = logger
+
+        self._expectations = dict()
+
+    def clear(self):
         """
 
         :return: custom response
         """
-        cls.expectations.clear()
-        cls.logger.info("All expectations were removed")
-        return CustomResponse("All expectations were removed")
+        self._expectations.clear()
 
-    @classmethod
-    def get_expectations_as_dict(cls):
+    def get_expectations(self):
         """
 
         :return: expectations as dict. Useful for inner operations
         """
-        return cls.expectations.copy()
+        return self._expectations.copy()
 
-    @classmethod
-    def get_expectations_as_response(cls):
+    def get_expectations_as_response(self):
         """
-
         :return: Expectations as custom response
         """
-        return CustomResponse(str(cls.expectations))
+        return CustomResponse(str(self._expectations))
 
-    @classmethod
-    def remove(cls, dict_with_key):
+    def remove(self, dict_with_key):
         """
         Removes particular expectations
         :param dict_with_key: dictionary with field 'key' and md5=value
         :return: custom response
         """
-        cls.logger.debug("arg: %s" % str(dict_with_key))
-        if 'key' in dict_with_key and dict_with_key['key'] in cls.expectations:
-            del(cls.expectations[dict_with_key['key']])
-            cls.logger.info("Expectation with key %s was removed" % dict_with_key)
+        self._logger.debug("arg: %s" % str(dict_with_key))
+        if 'key' in dict_with_key and dict_with_key['key'] in self._expectations:
+            del(self._expectations[dict_with_key['key']])
+            self._logger.info("Expectation with key %s was removed" % dict_with_key)
             return CustomResponse("Expectation with key %s was removed" % dict_with_key)
-        cls.logger.error("Expectation with key %s was NOT removed" % dict_with_key)
+        self._logger.error("Expectation with key %s was NOT removed" % dict_with_key)
         return CustomResponse("Error! Expectation with key %s was NOT removed" % dict_with_key, codes.bad)
 
-    @classmethod
-    def add(cls, expectation_as_dict):
+    def add(self, expectation_as_dict):
         if 'key' in expectation_as_dict:
             key = expectation_as_dict['key']
         else:
             key = hashlib.md5(str(expectation_as_dict).encode()).hexdigest()
 
-        if key in cls.expectations:
-            cls.logger.warning("Expectation with key '%s' already exists. Expectation will be updated" % key)
+        if key in self._expectations:
+            self._logger.warning("Expectation with key '%s' already exists. Expectation will be updated" % key)
 
-        cls.expectations[key] = expectation_as_dict
+        self._expectations[key] = expectation_as_dict
         return CustomResponse("Expectation has been added with key '%s'" % key)
 
-    @classmethod
-    def json_to_dict(cls, json_text):
+    def json_to_dict(self, json_text):
         json_dict = None
         try:
             json_dict = json.loads(json_text)
         except Exception as e:
-            cls.logger.error("Can't convert json to dict! Json %s" % json_text)
-            cls.logger.exception(e)
+            self._logger.error("Can't convert json to dict! Json %s" % json_text)
+            self._logger.exception(e)
             return json_dict, CustomResponse("Error! Can't convert json to dict! Json %s"
                                              "Exception: %s" % (json_text, str(e)), codes.bad)
         return json_dict, CustomResponse()
 
-    @classmethod
-    def status(cls):
+    def status(self):
         return CustomResponse("OK")
+
+    def get_matched_expectations_for_request(self, request):
+        """
+        Gets list of all matched expectations for this request
+        :param request: incoming request
+        :return: list of all matched expectations in random order
+        """
+
+        if len(self._expectations) == 0:
+            return []
+
+        list_matched_expectations = []
+        for key, expectation in self._expectations.items():
+            if 'request' not in expectation or ExpectationMatcher.is_expectation_match_request(expectation['request'],
+                                                                                               request):
+                list_matched_expectations.append(expectation)
+        self._logger.debug("Count of matched expectations: %s" % len(list_matched_expectations))
+        return list_matched_expectations

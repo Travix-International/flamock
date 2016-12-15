@@ -8,7 +8,7 @@ class LogContainerTest(unittest.TestCase):
     log_container = LogContainer(size)
 
     def setUp(self):
-        self.log_container.clean()
+        self.log_container.clear()
 
     def test_010_add_message(self):
         for i in range(0, self.size):
@@ -34,3 +34,18 @@ class LogContainerTest(unittest.TestCase):
         self.assertEqual(-1, self.log_container.get_latest_id())
         self.log_container.add("message")
         self.assertEqual(0, self.log_container.get_latest_id())
+
+    def test_040_update_last_with_kv_empty(self):
+        self.assertEqual(-1, self.log_container.get_latest_id())
+        self.log_container.update_last_with_kv("key", "value")
+        self.assertEqual(0, self.log_container.get_latest_id())
+        self.assertEqual("value", self.log_container.container[0]["key"])
+
+    def test_050_update_last_with_kv_not_empty(self):
+        self.assertEqual(-1, self.log_container.get_latest_id())
+        self.log_container.update_last_with_kv("key", "value")
+        self.assertEqual(0, self.log_container.get_latest_id())
+        self.assertEqual("value", self.log_container.container[0]["key"])
+        self.log_container.update_last_with_kv("key", "value2")
+        self.assertEqual(0, self.log_container.get_latest_id())
+        self.assertEqual("value2", self.log_container.container[0]["key"])

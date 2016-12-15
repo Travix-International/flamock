@@ -12,7 +12,7 @@ class LogContainer(object):
         self.size = size
         self._latest_id = -1
 
-    def clean(self):
+    def clear(self):
         self.container = dict()
         self._latest_id = -1
 
@@ -25,5 +25,8 @@ class LogContainer(object):
         self._latest_id = id
 
     def update_last_with_kv(self, key, value):
-        if isinstance(self.container[self._latest_id], dict):
-            self.container[self._latest_id][key] = value
+        if self._latest_id == -1:
+            self.add({key: value})
+        else:
+            if isinstance(self.container[self._latest_id], dict):
+                self.container[self._latest_id][key] = value
