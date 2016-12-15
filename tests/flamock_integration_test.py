@@ -114,7 +114,7 @@ class FlamockTest(unittest.TestCase):
 
         exp_mock_header = {
             'request': {
-                'headers': {'Sid':'123'}
+                'headers': {'Sid': '123'}
             },
             'response': {
                 'httpcode': 503,

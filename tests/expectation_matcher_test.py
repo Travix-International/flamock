@@ -33,7 +33,6 @@ class ExpectationMatcherTest(unittest.TestCase):
 
     def test_040_request_matcher_headers(self):
         req = {'method': 'GET', 'path': '', 'headers': {'h1': 'hv1'}}
-        req = dict(req)
         exp_request = {'headers': {'h1': 'hv1'}}
         self.assertTrue(ExpectationMatcher.is_expectation_match_request(exp_request, req))
         exp_request = {'headers': {'h1': 'hv2'}}

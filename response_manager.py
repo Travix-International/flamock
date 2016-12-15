@@ -46,7 +46,7 @@ class ResponseManager:
     _expectation_manager = None
     _do_request = None
 
-    def __init__(self, expectation_manager=None, logger=None, do_request=None):
+    def __init__(self, expectation_manager=None, do_request=None):
         self._expectation_manager = expectation_manager
         self.log_container = LogContainer()
 
@@ -91,9 +91,18 @@ class ResponseManager:
         """
         self.log_container.add({'request': request})
         if self.logs_url is None:
-            self._logger.info("Log id %s for request %s %s headers: %s" % (self.log_container.get_latest_id(), request['method'], request['path'], request['headers']))
+            self._logger.info("Log id %s for request %s %s headers: %s" % (
+                self.log_container.get_latest_id(),
+                request['method'],
+                request['path'],
+                request['headers']))
         else:
-            self._logger.info("Log %s/%s for request %s %s headers: %s" % (self.logs_url, self.log_container.get_latest_id(), request['method'], request['path'], request['headers']))
+            self._logger.info("Log %s/%s for request %s %s headers: %s" % (
+                self.logs_url,
+                self.log_container.get_latest_id(),
+                request['method'],
+                request['path'],
+                request['headers']))
 
         if len(self.host_whitelist) > 0:
             request_headers = request['headers'] if 'headers' in request else []
@@ -128,8 +137,13 @@ class ResponseManager:
         :param request: actual request is been forwarded
         :return: response from 3rd party as CustomResponse
         """
-        headers_in_request_to_ignore = ['Host', 'Content-Encoding', 'Content-Length']
-        headers_in_response_to_ignore = ['Content-Encoding', 'Content-Length', 'Transfer-Encoding', 'Strict-Transport-Security']
+        headers_in_request_to_ignore = ['Host',
+                                        'Content-Encoding',
+                                        'Content-Length']
+        headers_in_response_to_ignore = ['Content-Encoding',
+                                         'Content-Length',
+                                         'Transfer-Encoding',
+                                         'Strict-Transport-Security']
         request_method = request['method'] if 'method' in request else 'GET'
         request_path = request['path'] if 'path' in request else '/'
         request_body = request['body'] if 'body' in request else ''
@@ -176,13 +190,13 @@ class ResponseManager:
     def clear_log_messages(self):
         self.log_container.clear()
 
-    def return_log_messages(self, id):
-        if len(id) > 0:
+    def return_log_messages(self, log_id):
+        if len(log_id) > 0:
             try:
-                id = int(id)
+                log_id = int(log_id)
             except ValueError:
                 self._logger.error("Id for log message is not integer!")
-            if id in self.log_container.container:
-                return CustomResponse(str(self.log_container.container[id]))
+            if log_id in self.log_container.container:
+                return CustomResponse(str(self.log_container.container[log_id]))
         return CustomResponse(str(self.log_container.container))
 

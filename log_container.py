@@ -20,9 +20,9 @@ class LogContainer(object):
         return self._latest_id
 
     def add(self, value):
-        id = (self._latest_id+1) % self.size
-        self.container[id] = value
-        self._latest_id = id
+        log_id = (self._latest_id+1) % self.size
+        self.container[log_id] = value
+        self._latest_id = log_id
 
     def update_last_with_kv(self, key, value):
         if self._latest_id == -1:

@@ -6,9 +6,9 @@ import logging
 def encode_to_json_decorator(level):
     def decorator(func):
         def func_wrapper(cls, message):
-            kwargs = dict({'ts': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3],
-                           'level': logging.getLevelName(level),
-                           'message': message})
+            kwargs = {'ts': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3],
+                      'level': logging.getLevelName(level),
+                      'message': message}
             s = cls.encoder.encode(kwargs)
             return func(cls, s)
         return func_wrapper

@@ -13,7 +13,10 @@ request_mock_response_template = "method: %s, url: %s, body: %s, headers: %s"
 request_mock_response_headers = {'mock_header': 'mock_header_value', 'Content-Encoding': 'gzip'}
 
 
-def do_request_mock(method='', url='', data='', headers={}, **kwargs):
+def do_request_mock(method='', url='', data='', headers=None, **kwarg):
+    if headers is None:
+        headers = {}
+
     mock_headers = headers.copy()
     mock_headers.update(request_mock_response_headers)
     rep_str = request_mock_response_template % (method, url, data, headers)
@@ -29,7 +32,7 @@ class ResponseManagerTest(unittest.TestCase):
     _expectation_manager = None
 
     def setUp(self):
-        self._expectation_manager = ExpectationManager();
+        self._expectation_manager = ExpectationManager()
         self._response_manager = ResponseManager(self._expectation_manager)
         self._response_manager._do_request = do_request_mock
 
@@ -190,8 +193,6 @@ class ResponseManagerTest(unittest.TestCase):
                              {'h1': 'hv1'})
                          )
 
-
-
     def test_160_return_response_with_header(self):
         req = {'method': 'GET', 'path': 'pathv', 'headers': ''}
         exp = {'request': {'path': 'pathv'}, 'response': {'httpcode': 200, 'headers': {'h1': 'hv1'}}}
@@ -214,14 +215,12 @@ class ResponseManagerTest(unittest.TestCase):
         hosts_to_check = ['xxnet-403.appspot.com', 'testp1.piwo.pila.pl', 'testp4.pospr.waw.pl']
         for host in hosts_to_check:
             req = {'method': 'GET', 'path': '', 'headers': {'Host': host}}
-            req = dict(req)
             resp = self._response_manager.generate_response(req)
             self.assertEquals(405, resp.status_code)
 
         hosts_to_check = ['blabla.travix.com']
         for host in hosts_to_check:
             req = {'method': 'GET', 'path': '', 'headers': {'Host': host}}
-            req = dict(req)
             resp = self._response_manager.generate_response(req)
             self.assertEquals(200, resp.status_code)
 

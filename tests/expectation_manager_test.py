@@ -98,7 +98,5 @@ class ExpectationManagerTest(unittest.TestCase):
         for key, value in items:
             self.assertEqual(exp2, value)
 
-
-
 if __name__ == '__main__':
     unittest.main()

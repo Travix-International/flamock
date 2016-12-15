@@ -61,10 +61,10 @@ class FlaskFactory:
 
             return flask_app.expectation_manager.add(req_data_dict).to_flask_response()
 
-        @flask_app.route('/%s/logs' % cls.admin_path, defaults={'id': ''}, methods=['GET'])
-        @flask_app.route('/%s/logs/<path:id>' % cls.admin_path, methods=['GET'])
-        def admin_logs(id):
-            return flask_app.response_manager.return_log_messages(id).to_flask_response()
+        @flask_app.route('/%s/logs' % cls.admin_path, defaults={'log_id': ''}, methods=['GET'])
+        @flask_app.route('/%s/logs/<path:log_id>' % cls.admin_path, methods=['GET'])
+        def admin_logs(log_id):
+            return flask_app.response_manager.return_log_messages(log_id).to_flask_response()
 
         @flask_app.route('/%s/status' % cls.admin_path, methods=['GET'])
         def admin_status():
