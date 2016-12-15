@@ -1,4 +1,3 @@
-import re
 import time
 import urllib3
 import logging
@@ -9,6 +8,7 @@ from custom_reponse import CustomResponse
 from json_logging import JsonLogging
 from log_container import LogContainer
 from expectation_matcher import ExpectationMatcher
+from extensions import Extensions
 
 
 class ResponseManager:
@@ -43,19 +43,6 @@ class ResponseManager:
     host_whitelist = []
     log_container = LogContainer()
     logs_url = None
-
-    @classmethod
-    def sort_expectation_list_according_priority(cls, list_of_expectations):
-        """
-        Sorts  list of dicts according key 'priority'.
-        0 - lowest priority. Item with highest priority will be as first element
-        :param list_of_expectations: list of dicts with key 'priority'
-        :return: sorted list of dicts. first element has the biggest 'priority'
-        """
-        sorted_list = sorted(list_of_expectations,
-                             key=lambda exp: exp['priority'] if 'priority' in exp else 0,
-                             reverse=True)
-        return sorted_list
 
     @classmethod
     def get_matched_expectations_for_request(cls, request):
@@ -130,7 +117,7 @@ class ResponseManager:
         list_matched_expectations = cls.get_matched_expectations_for_request(request)
 
         if len(list_matched_expectations) > 0:
-            expectation = cls.sort_expectation_list_according_priority(list_matched_expectations)[0]
+            expectation = Extensions.order_by_priority(list_matched_expectations)[0]
             cls.logger.debug("Matched expectation: %s" % expectation)
             response = cls.apply_action_from_expectation_to_request(expectation, request)
         else:

@@ -91,22 +91,6 @@ class ResponseManagerTest(unittest.TestCase):
                              '{}')
                          )
 
-    def test_060_priority_sort_test(self):
-        list_of_exp = [
-            {'priority': 1},
-            {'priority': 3},
-            {'priority': 2},
-            {'not_priority': 0},
-        ]
-        expected_list = [
-            {'priority': 3},
-            {'priority': 2},
-            {'priority': 1},
-            {'not_priority': 0},
-        ]
-        sorted_list = ResponseManager.sort_expectation_list_according_priority(list_of_exp)
-        self.assertEquals(sorted_list, expected_list)
-
     def test_070_apply_action_from_expectation_to_request_response_test(self):
         exp_resp = {'response': {'body': 'RSP', 'httpcode': 203}}
 
