@@ -2,8 +2,7 @@ import json
 import logging
 import unittest
 from flamock import logging_format
-from flamock import admin_path as flamock_admin_path
-from flamock import flask_factory
+from flask_factory import FlaskFactory
 
 logging.basicConfig(level=logging.DEBUG, format=logging_format)
 
@@ -15,15 +14,16 @@ class FlamockTest(unittest.TestCase):
     base_url = 'http://%s:%s' % (base_host, base_port)
 
     def setUp(self):
-        self.app = flask_factory()
+        self.app = FlaskFactory.flask_factory()
         self.app.config['TESTING'] = True
         self.app.response_manager.host_whitelist = ["0.0.0.0"]
         self.app.response_manager.clear_log_messages()
         self.app.expectation_manager.clear()
         self.client = self.app.test_client()
+        self.flamock_admin_path = FlaskFactory.admin_path
 
     def test_010_check_status(self):
-        resp = self.client.get(self.base_url + '/' + flamock_admin_path + '/status')
+        resp = self.client.get(self.base_url + '/' + self.flamock_admin_path + '/status')
 
         self.assertEqual(resp.status_code, 200)
         self.assertEquals('OK', resp.get_data(as_text=True))
@@ -72,11 +72,11 @@ class FlamockTest(unittest.TestCase):
             'priority': 0
         }
 
-        resp = self.client.post(self.base_url + '/' + flamock_admin_path + '/add_expectation',
+        resp = self.client.post(self.base_url + '/' + self.flamock_admin_path + '/add_expectation',
                                 data=json.dumps(exp_fwd))
         self.assertEqual(resp.status_code, 200)
 
-        resp = self.client.post(self.base_url + '/' + flamock_admin_path + '/add_expectation',
+        resp = self.client.post(self.base_url + '/' + self.flamock_admin_path + '/add_expectation',
                                 data=json.dumps(exp_resp))
         self.assertEqual(resp.status_code, 200)
 
@@ -102,7 +102,7 @@ class FlamockTest(unittest.TestCase):
             }
         }
 
-        resp = self.client.post(self.base_url + '/' + flamock_admin_path + '/add_expectation',
+        resp = self.client.post(self.base_url + '/' + self.flamock_admin_path + '/add_expectation',
                                 data=json.dumps(exp_fwd))
         self.assertEqual(resp.status_code, 200)
 
@@ -130,10 +130,10 @@ class FlamockTest(unittest.TestCase):
             'priority': 0
         }
 
-        resp = self.client.post(self.base_url + '/' + flamock_admin_path + '/add_expectation',
+        resp = self.client.post(self.base_url + '/' + self.flamock_admin_path + '/add_expectation',
                                 data=json.dumps(exp_mock_header))
         self.assertEqual(resp.status_code, 200)
-        resp = self.client.post(self.base_url + '/' + flamock_admin_path + '/add_expectation',
+        resp = self.client.post(self.base_url + '/' + self.flamock_admin_path + '/add_expectation',
                                 data=json.dumps(exp_mock_all))
         self.assertEqual(resp.status_code, 200)
 
@@ -155,7 +155,7 @@ class FlamockTest(unittest.TestCase):
                 'host': fwd_host
             }
         }
-        resp = self.client.post(self.base_url + '/' + flamock_admin_path + '/add_expectation',
+        resp = self.client.post(self.base_url + '/' + self.flamock_admin_path + '/add_expectation',
                                 data=json.dumps(exp_fwd))
         self.assertEqual(resp.status_code, 200)
 
@@ -180,7 +180,7 @@ class FlamockTest(unittest.TestCase):
             }
         }
 
-        resp = self.client.post(self.base_url + '/' + flamock_admin_path + '/add_expectation',
+        resp = self.client.post(self.base_url + '/' + self.flamock_admin_path + '/add_expectation',
                                 data=json.dumps(exp_fwd))
         self.assertEqual(resp.status_code, 200)
 
@@ -189,7 +189,7 @@ class FlamockTest(unittest.TestCase):
         self.assertIn('showIP', resp.get_data(as_text=True))
 
     def test_070_get_empty_logs(self):
-        resp = self.client.get(self.base_url + '/' + flamock_admin_path + '/logs')
+        resp = self.client.get(self.base_url + '/' + self.flamock_admin_path + '/logs')
 
         self.assertEqual(resp.status_code, 200)
         self.assertEquals('{}', resp.get_data(as_text=True))
@@ -197,7 +197,7 @@ class FlamockTest(unittest.TestCase):
     def test_080_get_all_logs(self):
         self.client.get(self.base_url + '/')
 
-        resp = self.client.get(self.base_url + '/' + flamock_admin_path + '/logs')
+        resp = self.client.get(self.base_url + '/' + self.flamock_admin_path + '/logs')
 
         self.assertEqual(resp.status_code, 200)
         resp_text = resp.get_data(as_text=True)
@@ -210,7 +210,7 @@ class FlamockTest(unittest.TestCase):
     def test_090_get_log_by_id(self):
         self.client.get(self.base_url + '/')
 
-        resp = self.client.get(self.base_url + '/' + flamock_admin_path + '/logs/0')
+        resp = self.client.get(self.base_url + '/' + self.flamock_admin_path + '/logs/0')
 
         self.assertEqual(resp.status_code, 200)
         resp_text = resp.get_data(as_text=True)
