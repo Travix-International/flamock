@@ -15,12 +15,12 @@ class FlamockTest(unittest.TestCase):
     base_url = 'http://%s:%s' % (base_host, base_port)
 
     def setUp(self):
-        app = flask_factory()
-        app.config['TESTING'] = True
-        app.response_manager.host_whitelist = ["0.0.0.0"]
-        app.response_manager.clear_log_messages()
-        app.expectation_manager.clear()
-        self.client = app.test_client()
+        self.app = flask_factory()
+        self.app.config['TESTING'] = True
+        self.app.response_manager.host_whitelist = ["0.0.0.0"]
+        self.app.response_manager.clear_log_messages()
+        self.app.expectation_manager.clear()
+        self.client = self.app.test_client()
 
     def test_010_check_status(self):
         resp = self.client.get(self.base_url + '/' + flamock_admin_path + '/status')

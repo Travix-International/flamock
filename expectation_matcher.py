@@ -1,12 +1,11 @@
 import re
-import logging
 from json_logging import JsonLogging
 
 
 class ExpectationMatcher:
 
-    logger = JsonLogging(logging.getLogger(__name__))
-    re_flags = re.DOTALL
+    _logger = JsonLogging
+    _re_flags = re.DOTALL
 
     @classmethod
     def is_expectation_match_request(cls, request_exp, request_act):
@@ -22,7 +21,7 @@ class ExpectationMatcher:
             if attr in request_exp:
                 result = (attr in request_act) and cls.value_matcher(request_exp[attr], request_act[attr])
                 if result is False:
-                    cls.logger.debug(
+                    cls._logger.debug(
                         'Difference in {attribute}. expected: {expected_value}, actual: {actual_value}'.format(
                             attribute=attr,
                             expected_value=request_exp[attr],
@@ -30,7 +29,7 @@ class ExpectationMatcher:
                     )
                     return False
 
-        cls.logger.debug('Requests are match expected: {expected_value}, actual: {actual_value}'.format(
+        cls._logger.debug('Requests are match expected: {expected_value}, actual: {actual_value}'.format(
                         expected_value=str(request_exp), actual_value=str(request_act)))
         return True
 
@@ -44,11 +43,11 @@ class ExpectationMatcher:
         :return: true if actual value matches expected value or contains expected value as substring. Otherwise - false
         """
         try:
-            compiled_pattern = re.compile(expected_value, cls.re_flags)
+            compiled_pattern = re.compile(expected_value, cls._re_flags)
             search_result = compiled_pattern.search(actual_value)
             return search_result is not None
         except TypeError as e:
-            cls.logger.exception(e)
+            cls._logger.exception(e)
             return expected_value in actual_value
 
     @classmethod

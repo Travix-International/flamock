@@ -22,7 +22,8 @@ def flask_factory():
 
 def set_context(flask_app):
     with flask_app.app_context():
-        flask_app.json_logger = JsonLogging(flask_app.logger)
+        JsonLogging.logger = flask_app.logger
+        flask_app.json_logger = JsonLogging
         flask_app.expectation_manager = ExpectationManager()
         flask_app.response_manager = ResponseManager(flask_app.expectation_manager)
 

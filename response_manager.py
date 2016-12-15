@@ -42,17 +42,21 @@ class ResponseManager:
     log_container = None
     logs_url = None
 
-    _logger = None
+    _logger = JsonLogging
     _expectation_manager = None
+    _do_request = None
 
-    def __init__(self, expectation_manager=None, logger=None):
-        if logger is None:
-            self._logger = JsonLogging(logging.getLogger(__name__))
-        else:
-            self._logger = logger
-
+    def __init__(self, expectation_manager=None, logger=None, do_request=None):
         self._expectation_manager = expectation_manager
         self.log_container = LogContainer()
+
+        if do_request is None:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+            logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.ERROR)
+
+            self._do_request = requests.request
+        else:
+            self._do_request = do_request
 
     def apply_action_from_expectation_to_request(self, expectation, request):
         """
@@ -149,11 +153,8 @@ class ResponseManager:
         self._logger.debug("Forward request: %s %s body: %s headers: %s" % (
             request_method, url_for_request, CustomResponse.remove_linebreaks(request_body), forward_headers))
 
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.ERROR)
-
         try:
-            resp = requests.request(
+            resp = self._do_request(
                 method=request_method,
                 url=url_for_request,
                 data=request_body,

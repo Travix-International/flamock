@@ -1,7 +1,6 @@
 import time
 import unittest
 import logging
-import requests
 from flamock import logging_format
 from custom_reponse import CustomResponse
 from expectation_manager import ExpectationManager
@@ -14,7 +13,7 @@ request_mock_response_template = "method: %s, url: %s, body: %s, headers: %s"
 request_mock_response_headers = {'mock_header': 'mock_header_value', 'Content-Encoding': 'gzip'}
 
 
-def request_mock(method='', url='', data='', headers={}, **kwargs):
+def do_request_mock(method='', url='', data='', headers={}, **kwargs):
     mock_headers = headers.copy()
     mock_headers.update(request_mock_response_headers)
     rep_str = request_mock_response_template % (method, url, data, headers)
@@ -22,8 +21,6 @@ def request_mock(method='', url='', data='', headers={}, **kwargs):
     obj.content = rep_str
 
     return obj
-
-requests.request = request_mock
 
 
 class ResponseManagerTest(unittest.TestCase):
@@ -34,6 +31,7 @@ class ResponseManagerTest(unittest.TestCase):
     def setUp(self):
         self._expectation_manager = ExpectationManager();
         self._response_manager = ResponseManager(self._expectation_manager)
+        self._response_manager._do_request = do_request_mock
 
     def test_010_no_expectation(self):
         req = {'method': 'GET', 'path': 'pathv', 'headers': [('h1', 'hv1')], 'body': 'bodyv', 'cookies': {'c1': 'cv1'}}

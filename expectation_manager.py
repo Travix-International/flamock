@@ -1,6 +1,5 @@
 import json
 import hashlib
-import logging
 from requests.status_codes import codes
 from custom_reponse import CustomResponse
 from json_logging import JsonLogging
@@ -14,20 +13,13 @@ class ExpectationManager:
     todo: fix return types
     """
     _expectations = None  # dict with <md5: json_object>
-    _logger = None
-    expectations = None
+    _logger = JsonLogging
 
-    def __init__(self, logger=None):
-        if logger is None:
-            self._logger = JsonLogging(logging.getLogger(__name__))
-        else:
-            self._logger = logger
-
+    def __init__(self):
         self._expectations = dict()
 
     def clear(self):
         """
-
         :return: custom response
         """
         self._expectations.clear()
