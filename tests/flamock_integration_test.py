@@ -4,8 +4,6 @@ import unittest
 from flamock import logging_format
 from flamock import admin_path as flamock_admin_path
 from flamock import app
-from expectation_manager import ExpectationManager
-from response_manager import ResponseManager
 
 logging.basicConfig(level=logging.DEBUG, format=logging_format)
 
@@ -25,8 +23,6 @@ class FlamockTest(unittest.TestCase):
         app.response_manager.clear_log_messages()
         app.expectation_manager.clear()
         self.client = app.test_client()
-        self.client.set_cookie('localhost', 'cookie1', 'cookie1_value')
-        self.client.set_cookie('localhost', 'cookie2', 'cookie2_value')
 
     def test_010_check_status(self):
         resp = self.client.get(self.base_url + '/' + flamock_admin_path + '/status')
@@ -36,6 +32,9 @@ class FlamockTest(unittest.TestCase):
 
     def test_020_no_expectation_get_headers_and_cookies(self):
         path = 'a/b/c'
+
+        self.client.set_cookie('localhost', 'cookie1', 'cookie1_value')
+        self.client.set_cookie('localhost', 'cookie2', 'cookie2_value')
 
         resp = self.client.get(self.base_url + '/' + path,
                                headers={'header1': 'header1_value', 'header2': 'header2_value'})
@@ -50,12 +49,12 @@ class FlamockTest(unittest.TestCase):
         self.assertIn("'cookie2': 'cookie2_value'", resp_text)
 
     def test_030_configure_transparent_mock(self):
-        fwd_host = 'google.com'
-        fwd_scheme = 'https'
+        fwd_host = 'echo.jsontest.com'
+        fwd_scheme = 'http'
 
         exp_resp = {
             'request': {
-                'path': 'folder/service.aspx',
+                'path': 'key/value',
                 'body': '<session_id>123.*<'
             },
             'response': {
@@ -66,7 +65,7 @@ class FlamockTest(unittest.TestCase):
         }
         exp_fwd = {
             'request': {
-                'path': 'folder/service.aspx'
+                'path': 'key/value'
             },
             'forward': {
                 'scheme': fwd_scheme,
@@ -83,20 +82,20 @@ class FlamockTest(unittest.TestCase):
                                 data=json.dumps(exp_resp))
         self.assertEqual(resp.status_code, 200)
 
-        resp = self.client.get(self.base_url + '/folder/service.aspx',
+        resp = self.client.get(self.base_url + '/key/value',
                                data='<session_id>1234</session_id>',
                                headers={'header1': 'header1_value', 'header2': 'header2_value'})
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.get_data(as_text=True), 'Mock answer!')
 
-        resp = self.client.get(self.base_url + '/folder/service.aspx',
+        resp = self.client.get(self.base_url + '/key/value',
                                data='<session_id>456</session_id>',
                                headers={'header1': 'header1_value', 'header2': 'header2_value'})
         self.assertEqual(resp.status_code, 400)
 
     def test_040_wide_expectation_with_empty_path(self):
-        fwd_host = 'google.nl'
-        fwd_scheme = 'https'
+        fwd_host = 'echo.jsontest.com'
+        fwd_scheme = 'http'
 
         exp_fwd = {
             'forward': {
@@ -109,9 +108,9 @@ class FlamockTest(unittest.TestCase):
                                 data=json.dumps(exp_fwd))
         self.assertEqual(resp.status_code, 200)
 
-        resp = self.client.get(self.base_url + '/')
+        resp = self.client.get(self.base_url + '/key/value')
         self.assertEqual(resp.status_code, 200)
-        self.assertIn('>Google<', resp.get_data(as_text=True))
+        self.assertIn('"key": "value"', resp.get_data(as_text=True))
 
     def test_050_response_for_headers(self):
 
@@ -149,8 +148,8 @@ class FlamockTest(unittest.TestCase):
         self.assertIn('Mock answer without header!', resp.get_data(as_text=True))
 
     def test_055_wide_expectation_with_empty_path(self):
-        fwd_host = 'yandex.ru/search'
-        fwd_scheme = 'https'
+        fwd_host = 'ip.jsontest.com'
+        fwd_scheme = 'http'
 
         exp_fwd = {
             'forward': {
@@ -158,18 +157,17 @@ class FlamockTest(unittest.TestCase):
                 'host': fwd_host
             }
         }
-
         resp = self.client.post(self.base_url + '/' + flamock_admin_path + '/add_expectation',
                                 data=json.dumps(exp_fwd))
         self.assertEqual(resp.status_code, 200)
 
-        resp = self.client.get(self.base_url + '/?text=Hello')
+        resp = self.client.get(self.base_url + '/?callback=showIP')
         self.assertEqual(resp.status_code, 200)
-        self.assertIn('text=Hello', resp.get_data(as_text=True))
+        self.assertIn('showIP', resp.get_data(as_text=True))
 
     def test_060_header_when_forward(self):
-        fwd_host = 'yandex.ru/search'
-        fwd_scheme = 'https'
+        fwd_host = 'ip.jsontest.com'
+        fwd_scheme = 'http'
 
         exp_fwd = {
             'request': {
@@ -188,9 +186,9 @@ class FlamockTest(unittest.TestCase):
                                 data=json.dumps(exp_fwd))
         self.assertEqual(resp.status_code, 200)
 
-        resp = self.client.get(self.base_url + '/?text=Hello')
+        resp = self.client.get(self.base_url + '/?callback=showIP')
         self.assertEqual(resp.status_code, 200)
-        self.assertIn('text=Hello', resp.get_data(as_text=True))
+        self.assertIn('showIP', resp.get_data(as_text=True))
 
     def test_070_get_empty_logs(self):
         resp = self.client.get(self.base_url + '/' + flamock_admin_path + '/logs')
