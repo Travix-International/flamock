@@ -12,72 +12,76 @@ logging_format = '%(message)s'
 admin_path = 'flamock'
 
 
-app = Flask(__name__)
-with app.app_context():
-    app.json_logger = JsonLogging(app.logger)
-    app.expectation_manager = ExpectationManager()
-    app.response_manager = ResponseManager(app.expectation_manager)
+def flask_factory():
+    flask_app = Flask(__name__)
+    set_context(flask_app)
+    set_routes(flask_app)
+    CustomResponse.flask_app = flask_app
+    return flask_app
 
 
-@app.route('/%s/remove_all_expectations' % admin_path, methods=['POST'])
-def admin_remove_all_expectations():
-    app.json_logger.info("Remove all expectations")
-    app.expectation_manager.clear()
-    return CustomResponse("All expectations were removed").to_flask_response()
+def set_context(flask_app):
+    with flask_app.app_context():
+        flask_app.json_logger = JsonLogging(flask_app.logger)
+        flask_app.expectation_manager = ExpectationManager()
+        flask_app.response_manager = ResponseManager(flask_app.expectation_manager)
 
 
-@app.route('/%s/remove_expectation' % admin_path, methods=['POST'])
-def admin_remove_expectation():
-    request_data = request.data.decode()
-    app.json_logger.info("Remove expectation: %s" % CustomResponse.remove_linebreaks(request_data))
-    req_data_dict, resp = app.expectation_manager.json_to_dict(request_data)
-    if req_data_dict is None and resp.staus_code != 200:
-        return resp.to_flask_response()
+def set_routes(flask_app):
 
-    return app.expectation_manager.remove(req_data_dict).to_flask_response()
+    @flask_app.route('/%s/remove_all_expectations' % admin_path, methods=['POST'])
+    def admin_remove_all_expectations():
+        flask_app.json_logger.info("Remove all expectations")
+        flask_app.expectation_manager.clear()
+        return CustomResponse("All expectations were removed").to_flask_response()
 
+    @flask_app.route('/%s/remove_expectation' % admin_path, methods=['POST'])
+    def admin_remove_expectation():
+        request_data = request.data.decode()
+        flask_app.json_logger.info("Remove expectation: %s" % CustomResponse.remove_linebreaks(request_data))
+        req_data_dict, resp = flask_app.expectation_manager.json_to_dict(request_data)
+        if req_data_dict is None and resp.staus_code != 200:
+            return resp.to_flask_response()
 
-@app.route('/%s/get_expectations' % admin_path, methods=['POST'])
-def admin_get_expectations():
-    app.json_logger.info("Get expectations")
-    return app.expectation_manager.get_expectations_as_response().to_flask_response()
+        return flask_app.expectation_manager.remove(req_data_dict).to_flask_response()
 
+    @flask_app.route('/%s/get_expectations' % admin_path, methods=['POST'])
+    def admin_get_expectations():
+        flask_app.json_logger.info("Get expectations")
+        return flask_app.expectation_manager.get_expectations_as_response().to_flask_response()
 
-@app.route('/%s/add_expectation' % admin_path, methods=['POST'])
-def admin_add_expectation():
-    request_data = request.data.decode()
-    app.json_logger.info("Add expectation: %s" % CustomResponse.remove_linebreaks(request_data))
-    req_data_dict, resp = app.expectation_manager.json_to_dict(request_data)
-    if req_data_dict is None and resp.status_code != 200:
-        return resp.to_flask_response()
+    @flask_app.route('/%s/add_expectation' % admin_path, methods=['POST'])
+    def admin_add_expectation():
+        request_data = request.data.decode()
+        flask_app.json_logger.info("Add expectation: %s" % CustomResponse.remove_linebreaks(request_data))
+        req_data_dict, resp = flask_app.expectation_manager.json_to_dict(request_data)
+        if req_data_dict is None and resp.status_code != 200:
+            return resp.to_flask_response()
 
-    return app.expectation_manager.add(req_data_dict).to_flask_response()
+        return flask_app.expectation_manager.add(req_data_dict).to_flask_response()
 
+    @flask_app.route('/%s/logs' % admin_path, defaults={'id': ''}, methods=['GET'])
+    @flask_app.route('/%s/logs/<path:id>' % admin_path, methods=['GET'])
+    def admin_logs(id):
+        return flask_app.response_manager.return_log_messages(id).to_flask_response()
 
-@app.route('/%s/logs' % admin_path, defaults={'id': ''}, methods=['GET'])
-@app.route('/%s/logs/<path:id>' % admin_path, methods=['GET'])
-def admin_logs(id):
-    return app.response_manager.return_log_messages(id).to_flask_response()
+    @flask_app.route('/%s/status' % admin_path, methods=['GET'])
+    def admin_status():
+        return flask_app.expectation_manager.status().to_flask_response()
 
-
-@app.route('/%s/status' % admin_path, methods=['GET'])
-def admin_status():
-    return app.expectation_manager.status().to_flask_response()
-
-
-@app.route('/', defaults={'request_path': ''}, methods=['GET', 'POST'])
-@app.route('/<path:request_path>', methods=['GET', 'POST'])
-def mock_process(request_path):
-    query_string = request.query_string.decode()
-    path = request.full_path[1:]  # copy full path without first slash
-    if len(query_string) == 0:
-        path = path[:len(path)-1]  # remove question char in the end if query is empty
-    req = {'method': request.method,
-           'path': path,
-           'headers': Extensions.list_of_tuples_to_dict(request.headers),
-           'body': request.data.decode(),
-           'cookies': request.cookies}
-    return app.response_manager.generate_response(req).to_flask_response()
+    @flask_app.route('/', defaults={'request_path': ''}, methods=['GET', 'POST'])
+    @flask_app.route('/<path:request_path>', methods=['GET', 'POST'])
+    def mock_process(request_path):
+        query_string = request.query_string.decode()
+        path = request.full_path[1:]  # copy full path without first slash
+        if len(query_string) == 0:
+            path = path[:len(path)-1]  # remove question char in the end if query is empty
+        req = {'method': request.method,
+               'path': path,
+               'headers': Extensions.list_of_tuples_to_dict(request.headers),
+               'body': request.get_data(True).decode(),
+               'cookies': request.cookies}
+        return flask_app.response_manager.generate_response(req).to_flask_response()
 
 
 if __name__ == '__main__':
@@ -140,6 +144,8 @@ if __name__ == '__main__':
         # disable werkzeug logs for INFO level
         logging.getLogger('werkzeug').setLevel(logging.WARNING)
     logging.getLogger().setLevel(args.loglevel)
+
+    app = flask_factory()
 
     if args.proxy_host is not None:
         scheme = args.proxy_scheme

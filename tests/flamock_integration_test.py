@@ -3,7 +3,7 @@ import logging
 import unittest
 from flamock import logging_format
 from flamock import admin_path as flamock_admin_path
-from flamock import app
+from flamock import flask_factory
 
 logging.basicConfig(level=logging.DEBUG, format=logging_format)
 
@@ -14,12 +14,10 @@ class FlamockTest(unittest.TestCase):
     base_host = "0.0.0.0"
     base_url = 'http://%s:%s' % (base_host, base_port)
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
+        app = flask_factory()
         app.config['TESTING'] = True
         app.response_manager.host_whitelist = ["0.0.0.0"]
-
-    def setUp(self):
         app.response_manager.clear_log_messages()
         app.expectation_manager.clear()
         self.client = app.test_client()

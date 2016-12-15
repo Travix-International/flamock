@@ -5,6 +5,7 @@ class CustomResponse(object):
     _status_code = codes.ok
     _text = ''
     _headers = {}
+    flask_app = None
 
     @property
     def text(self):
@@ -30,8 +31,7 @@ class CustomResponse(object):
         return {"status_code": self._status_code, "text": self.remove_linebreaks(str(self._text)), "headers": self._headers}
 
     def to_flask_response(self):
-        from flask import make_response
-        resp = make_response((self._text, self._status_code, dict(self._headers)))
+        resp = self.flask_app.make_response((self._text, self._status_code, dict(self._headers)))
         return resp
 
     @staticmethod

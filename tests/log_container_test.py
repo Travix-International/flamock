@@ -49,3 +49,9 @@ class LogContainerTest(unittest.TestCase):
         self.log_container.update_last_with_kv("key", "value2")
         self.assertEqual(0, self.log_container.get_latest_id())
         self.assertEqual("value2", self.log_container.container[0]["key"])
+
+    def test_050_log_xml_structure(self):
+        self.assertEqual(-1, self.log_container.get_latest_id())
+        self.log_container.add("<root></root>")
+        self.assertEqual(0, self.log_container.get_latest_id())
+        self.assertEqual(0, self.log_container.get_latest_id())

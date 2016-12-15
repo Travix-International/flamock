@@ -239,6 +239,12 @@ class ResponseManagerTest(unittest.TestCase):
         self.assertEquals('', resp.text)
         self.assertGreaterEqual(diff, delay)
 
+    def test_200_get_log_messages(self):
+        text = "\r\n<XML></XML>\r\n"
+        self._response_manager.log_container.add(text)
+        resp = self._response_manager.return_log_messages("0")
+        self.assertEquals(200, resp.status_code)
+        self.assertEquals(text, resp.text)
 
 if __name__ == '__main__':
     unittest.main()
