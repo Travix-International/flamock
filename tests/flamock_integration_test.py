@@ -169,13 +169,13 @@ class FlamockTest(unittest.TestCase):
 
         exp_fwd = {
             'request': {
-                'path': 'search'
+                'path': 'callback'
             },
             'forward': {
                 'scheme': fwd_scheme,
                 'host': fwd_host,
                 'headers': {
-                    'Host': 'yandex.ru'
+                    'Host': 'ya.ru'
                 }
             }
         }
@@ -185,8 +185,8 @@ class FlamockTest(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
 
         resp = self.client.get(self.base_url + '/?callback=showIP')
-        self.assertEqual(resp.status_code, 200)
-        self.assertIn('showIP', resp.get_data(as_text=True))
+        self.assertEqual(resp.status_code, 404)
+        self.assertIn('yandex', resp.get_data(as_text=True))
 
     def test_070_get_empty_logs(self):
         resp = self.client.get(self.base_url + '/' + self.flamock_admin_path + '/logs')

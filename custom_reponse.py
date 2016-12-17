@@ -30,18 +30,14 @@ class CustomResponse(object):
     def __str__(self):
         return "status_code: %s, text: %s, headers: %s" % (
             self._status_code,
-            self.remove_linebreaks(str(self._text)),
+            str(self._text),
             self._headers)
 
     def to_dict(self):
         return {"status_code": self._status_code,
-                "text": self.remove_linebreaks(str(self._text)),
+                "text": str(self._text),
                 "headers": self._headers}
 
     def to_flask_response(self):
         resp = self.flask_app.make_response((self._text, self._status_code, dict(self._headers)))
         return resp
-
-    @staticmethod
-    def remove_linebreaks(string_with_linebreaks):
-        return string_with_linebreaks.replace('\r\n', ' ').replace('\r', ' ').replace('\n', ' ')

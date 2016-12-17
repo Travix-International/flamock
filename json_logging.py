@@ -1,6 +1,7 @@
 import json
 import datetime
 import logging
+from extensions import Extensions
 
 
 def encode_to_json_decorator(level):
@@ -8,7 +9,7 @@ def encode_to_json_decorator(level):
         def func_wrapper(cls, message):
             kwargs = {'ts': datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3],
                       'level': logging.getLevelName(level),
-                      'message': message}
+                      'message': Extensions.remove_linebreaks(message)}
             s = cls.encoder.encode(kwargs)
             return func(cls, s)
         return func_wrapper

@@ -19,3 +19,7 @@ class Extensions:
                              key=lambda exp: exp['priority'] if 'priority' in exp else 0,
                              reverse=True)
         return sorted_list
+
+    @staticmethod
+    def remove_linebreaks(string_with_linebreaks):
+        return string_with_linebreaks.replace('\r\n', ' ').replace('\r', ' ').replace('\n', ' ')

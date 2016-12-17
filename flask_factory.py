@@ -39,7 +39,7 @@ class FlaskFactory:
         @flask_app.route('/%s/remove_expectation' % cls.admin_path, methods=['POST'])
         def admin_remove_expectation():
             request_data = request.data.decode()
-            flask_app.json_logger.info("Remove expectation: %s" % CustomResponse.remove_linebreaks(request_data))
+            flask_app.json_logger.info("Remove expectation: %s" % request_data)
             req_data_dict, resp = flask_app.expectation_manager.json_to_dict(request_data)
             if req_data_dict is None and resp.staus_code != 200:
                 return resp.to_flask_response()
@@ -54,7 +54,7 @@ class FlaskFactory:
         @flask_app.route('/%s/add_expectation' % cls.admin_path, methods=['POST'])
         def admin_add_expectation():
             request_data = request.data.decode()
-            flask_app.json_logger.info("Add expectation: %s" % CustomResponse.remove_linebreaks(request_data))
+            flask_app.json_logger.info("Add expectation: %s" % request_data)
             req_data_dict, resp = flask_app.expectation_manager.json_to_dict(request_data)
             if req_data_dict is None and resp.status_code != 200:
                 return resp.to_flask_response()

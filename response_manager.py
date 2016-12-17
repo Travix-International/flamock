@@ -162,10 +162,10 @@ class ResponseManager:
         self.log_container.update_last_with_kv('forward', {
             "request_method": request_method,
             "url": url_for_request,
-            "body": CustomResponse.remove_linebreaks(request_body),
+            "body": request_body,
             "headers": forward_headers})
         self._logger.debug("Forward request: %s %s body: %s headers: %s" % (
-            request_method, url_for_request, CustomResponse.remove_linebreaks(request_body), forward_headers))
+            request_method, url_for_request, request_body, forward_headers))
 
         try:
             resp = self._do_request(
