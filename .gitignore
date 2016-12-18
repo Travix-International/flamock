@@ -3,6 +3,7 @@
 
 
 # Unit test / coverage reports
+__pycache__
 htmlcov/
 .coverage
 .coverage.*
@@ -10,3 +11,4 @@ htmlcov/
 
 # virtualenv
 venv/
+
