@@ -27,8 +27,6 @@ fi
 
 if [ -n "$WHITE_LIST" ]; then
     args=$args" --whitelist $WHITE_LIST"
-else
-    args=$args" --whitelist \"\""
 fi
 
 if [ -n "$PORTS" ]; then

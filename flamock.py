@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     argument_parser.add_argument("-wl", "--whitelist",
                                  type=str,
-                                 default="travix.com",
+                                 default=None,
                                  action="store",
                                  required=False,
                                  help="Whitelist of hosts. A list in format host1,host2...")
