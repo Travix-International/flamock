@@ -25,6 +25,12 @@ if [ -n "$EXPECTATIONS" ]; then
     args=$args" --expectations $EXPECTATIONS"
 fi
 
+if [ -n "$WHITE_LIST" ]; then
+    args=$args" --whitelist $WHITE_LIST"
+else
+    args=$args" --whitelist \"\""
+fi
+
 if [ -n "$PORTS" ]; then
     for port in $PORTS; do
         port=" --port "$port
