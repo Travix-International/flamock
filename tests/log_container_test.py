@@ -3,7 +3,6 @@ from log_container import LogContainer
 
 
 class LogContainerTest(unittest.TestCase):
-
     size = 100
     log_container = LogContainer(size)
 
@@ -16,7 +15,7 @@ class LogContainerTest(unittest.TestCase):
 
         self.assertEqual(self.size, len(self.log_container.container))
         self.assertEqual(0, self.log_container.container[0])
-        self.assertEqual(self.size-1, self.log_container.container[self.size-1])
+        self.assertEqual(self.size - 1, self.log_container.container[self.size - 1])
 
         self.log_container.add(self.size + 1)
         self.assertEqual(self.size, len(self.log_container.container))

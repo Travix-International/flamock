@@ -1,9 +1,9 @@
 import re
+
 from json_logging import JsonLogging
 
 
 class ExpectationMatcher:
-
     _logger = JsonLogging
     _re_flags = re.DOTALL
 
@@ -30,7 +30,7 @@ class ExpectationMatcher:
                     return False
 
         cls._logger.debug('Requests are match expected: {expected_value}, actual: {actual_value}'.format(
-                        expected_value=str(request_exp), actual_value=str(request_act)))
+            expected_value=str(request_exp), actual_value=str(request_act)))
         return True
 
     @classmethod

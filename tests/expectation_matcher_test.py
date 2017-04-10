@@ -7,7 +7,6 @@ logging.basicConfig(level=logging.DEBUG, format=logging_format)
 
 
 class ExpectationMatcherTest(unittest.TestCase):
-
     def test_010_request_matcher_substring(self):
         req = {'method': 'GET', 'path': 'http://hostname.com/subp1', 'body': 'bodycontent'}
         exp_request = {'method': 'GET'}

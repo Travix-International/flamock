@@ -1,14 +1,14 @@
 from flask import Flask
 from flask import request
-from response_manager import ResponseManager
-from expectation_manager import ExpectationManager
+
 from custom_reponse import CustomResponse
-from json_logging import JsonLogging
+from expectation_manager import ExpectationManager
 from extensions import Extensions
+from json_logging import JsonLogging
+from response_manager import ResponseManager
 
 
 class FlaskFactory:
-
     admin_path = 'flamock'
 
     @classmethod
@@ -83,4 +83,3 @@ class FlaskFactory:
                    'body': request.get_data(True).decode(),
                    'cookies': request.cookies}
             return flask_app.response_manager.generate_response(req).to_flask_response()
-

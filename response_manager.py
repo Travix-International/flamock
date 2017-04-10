@@ -1,13 +1,15 @@
-import time
-import urllib3
 import logging
+import time
+
 import requests
+import urllib3
 from requests.status_codes import codes
+
 from custom_reponse import CustomResponse
-from json_logging import JsonLogging
-from log_container import LogContainer
 from expectation_matcher import ExpectationMatcher
 from extensions import Extensions
+from json_logging import JsonLogging
+from log_container import LogContainer
 
 
 class ResponseManager:
@@ -199,4 +201,3 @@ class ResponseManager:
             if log_id in self.log_container.container:
                 return CustomResponse(str(self.log_container.container[log_id]))
         return CustomResponse(str(self.log_container.container))
-

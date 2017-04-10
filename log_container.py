@@ -20,7 +20,7 @@ class LogContainer(object):
         return self._latest_id
 
     def add(self, value):
-        log_id = (self._latest_id+1) % self.size
+        log_id = (self._latest_id + 1) % self.size
         self.container[log_id] = value
         self._latest_id = log_id
 

@@ -1,9 +1,10 @@
+import logging
 import time
 import unittest
-import logging
-from logging_format import logging_format
+
 from custom_reponse import CustomResponse
 from expectation_manager import ExpectationManager
+from logging_format import logging_format
 from response_manager import ResponseManager
 
 logging.basicConfig(level=logging.DEBUG, format=logging_format)
@@ -27,7 +28,6 @@ def do_request_mock(method='', url='', data='', headers=None, **kwarg):
 
 
 class ResponseManagerTest(unittest.TestCase):
-
     _response_manager = None
     _expectation_manager = None
 
@@ -75,7 +75,7 @@ class ResponseManagerTest(unittest.TestCase):
 
         expected_headers = request_mock_response_headers.copy()
         expected_headers.update(req['headers'])
-        del(expected_headers['Content-Encoding'])
+        del (expected_headers['Content-Encoding'])
         self.assertEqual(resp.headers, expected_headers)
 
     def test_060_request_matches_forward(self):
@@ -117,12 +117,12 @@ class ResponseManagerTest(unittest.TestCase):
                           )
 
     def test_090_empty_expectation_response_default_values(self):
-            req = {'method': 'GET', 'path': 'pathv', 'headers': ''}
-            exp = {'request': {'path': 'pathv'}, 'response': {}}
-            self._expectation_manager.add(exp)
-            resp = self._response_manager.generate_response(req)
-            self.assertEquals(200, resp.status_code)
-            self.assertEquals('', resp.text)
+        req = {'method': 'GET', 'path': 'pathv', 'headers': ''}
+        exp = {'request': {'path': 'pathv'}, 'response': {}}
+        self._expectation_manager.add(exp)
+        resp = self._response_manager.generate_response(req)
+        self.assertEquals(200, resp.status_code)
+        self.assertEquals('', resp.text)
 
     def test_110_make_request_ignore_host_in_header(self):
         req = {
@@ -167,8 +167,8 @@ class ResponseManagerTest(unittest.TestCase):
                          )
         expected_headers = request_mock_response_headers.copy()
         expected_headers.update(req['headers'])
-        del(expected_headers['Content-Length'])
-        del(expected_headers['Content-Encoding'])
+        del (expected_headers['Content-Length'])
+        del (expected_headers['Content-Encoding'])
 
         self.assertEqual(resp.headers, expected_headers)
 
@@ -243,6 +243,6 @@ class ResponseManagerTest(unittest.TestCase):
         self.assertEquals(200, resp.status_code)
         self.assertEquals(text, resp.text)
 
+
 if __name__ == '__main__':
     unittest.main()
-

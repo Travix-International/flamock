@@ -1,6 +1,7 @@
-import json
 import datetime
+import json
 import logging
+
 from extensions import Extensions
 
 
@@ -12,7 +13,9 @@ def encode_to_json_decorator(level):
                       'message': Extensions.remove_linebreaks(message)}
             s = cls.encoder.encode(kwargs)
             return func(cls, s)
+
         return func_wrapper
+
     return decorator
 
 

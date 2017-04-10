@@ -1,5 +1,6 @@
 import logging
 from argparse import ArgumentParser
+
 from flask_factory import FlaskFactory
 from logging_format import logging_format
 

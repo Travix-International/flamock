@@ -1,9 +1,11 @@
-import json
 import hashlib
+import json
+
 from requests.status_codes import codes
+
 from custom_reponse import CustomResponse
-from json_logging import JsonLogging
 from expectation_matcher import ExpectationMatcher
+from json_logging import JsonLogging
 
 
 class ExpectationManager:
@@ -45,7 +47,7 @@ class ExpectationManager:
         """
         self._logger.debug("arg: %s" % str(dict_with_key))
         if 'key' in dict_with_key and dict_with_key['key'] in self._expectations:
-            del(self._expectations[dict_with_key['key']])
+            del (self._expectations[dict_with_key['key']])
             self._logger.info("Expectation with key %s was removed" % dict_with_key)
             return CustomResponse("Expectation with key %s was removed" % dict_with_key)
         self._logger.error("Expectation with key %s was NOT removed" % dict_with_key)

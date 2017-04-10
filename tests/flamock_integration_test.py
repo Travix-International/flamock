@@ -8,7 +8,6 @@ logging.basicConfig(level=logging.DEBUG, format=logging_format)
 
 
 class FlamockTest(unittest.TestCase):
-
     base_port = 1080
     base_host = "0.0.0.0"
     base_url = 'http://%s:%s' % (base_host, base_port)
@@ -111,7 +110,6 @@ class FlamockTest(unittest.TestCase):
         self.assertIn('"key": "value"', resp.get_data(as_text=True))
 
     def test_050_response_for_headers(self):
-
         exp_mock_header = {
             'request': {
                 'headers': {'Sid': '123'}
@@ -219,6 +217,7 @@ class FlamockTest(unittest.TestCase):
         self.assertIn('request', resp_text)
         self.assertIn('response', resp_text)
         self.assertIn('No expectation for request', resp_text)
+
 
 if __name__ == '__main__':
     unittest.main()
