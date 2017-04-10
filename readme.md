@@ -1,5 +1,6 @@
 Flamock
 ==========
+[![Build Status](https://travis-ci.org/Travix-International/flamock.svg?branch=master)](https://travis-ci.org/Travix-International/flamock)
 
 # Overview
 Inspired by mock-server and wiremock. Implementation of mock server in Python + Flask.
