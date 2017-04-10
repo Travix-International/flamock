@@ -1,7 +1,7 @@
 Flamock
 ==========
 [![Build Status](https://travis-ci.org/Travix-International/flamock.svg?branch=master)](https://travis-ci.org/Travix-International/flamock)
-
+[![Coverage Status](https://coveralls.io/repos/github/Travix-International/flamock.svg?branch=master)](https://coveralls.io/github/Travix-International/flamock)
 # Overview
 Inspired by mock-server and wiremock. Implementation of mock server in Python + Flask.
 All incoming requests are validated according saved expectations.
